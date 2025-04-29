@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Home, Search, Plus, User, Music } from "lucide-react";
+import { Home, Search, Plus, User, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
@@ -15,7 +15,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick }) => 
     <button
       className={cn(
         "flex flex-col items-center justify-center py-2 w-full",
-        isActive ? "text-primary" : "text-muted-foreground"
+        isActive ? "text-[#fe2c55]" : "text-white"
       )}
       onClick={onClick}
     >
@@ -29,8 +29,8 @@ const SideNav: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState("home");
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-      <div className="flex justify-around">
+    <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 z-50 pb-safe">
+      <div className="flex justify-around max-w-screen-md mx-auto">
         <NavItem
           icon={<Home className="h-5 w-5" />}
           label="首页"
@@ -45,15 +45,15 @@ const SideNav: React.FC = () => {
         />
         <NavItem
           icon={
-            <div className="bg-primary rounded-lg p-1">
-              <Plus className="h-4 w-4 text-white" />
+            <div className="bg-[#fe2c55] rounded-lg p-2 -mt-5 mb-1">
+              <Plus className="h-5 w-5 text-white" />
             </div>
           }
           label=""
           onClick={() => {}}
         />
         <NavItem
-          icon={<Music className="h-5 w-5" />}
+          icon={<MessageCircle className="h-5 w-5" />}
           label="消息"
           isActive={activeTab === "inbox"}
           onClick={() => setActiveTab("inbox")}

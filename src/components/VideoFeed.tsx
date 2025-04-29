@@ -15,6 +15,7 @@ interface Video {
   likes: number;
   comments: number;
   shares: number;
+  musicName: string;
 }
 
 const DUMMY_VIDEOS: Video[] = [
@@ -28,6 +29,7 @@ const DUMMY_VIDEOS: Video[] = [
     likes: 12400,
     comments: 88,
     shares: 120,
+    musicName: "原声 - yogalover创作"
   },
   {
     id: "2",
@@ -39,6 +41,7 @@ const DUMMY_VIDEOS: Video[] = [
     likes: 45600,
     comments: 234,
     shares: 456,
+    musicName: "夏日海滩 - 热门BGM"
   },
   {
     id: "3",
@@ -50,6 +53,7 @@ const DUMMY_VIDEOS: Video[] = [
     likes: 78900,
     comments: 543,
     shares: 876,
+    musicName: "自然之声 - 纯音乐"
   },
 ];
 
@@ -85,12 +89,12 @@ const VideoFeed: React.FC = () => {
     <>
       <div
         ref={feedRef}
-        className="h-[calc(100vh-56px)] overflow-y-scroll snap-mandatory hide-scrollbar"
+        className="h-screen w-full overflow-y-scroll snap-mandatory snap-y hide-scrollbar"
       >
         {DUMMY_VIDEOS.map((video, index) => (
           <div
             key={video.id}
-            className="h-screen w-full snap-center"
+            className="h-screen w-full snap-start"
           >
             <div className="relative h-full">
               <VideoPlayer
@@ -102,6 +106,7 @@ const VideoFeed: React.FC = () => {
                 nickname={video.nickname}
                 caption={video.caption}
                 avatarSrc={video.avatarSrc}
+                musicName={video.musicName}
               />
               <ActionBar
                 likes={video.likes}

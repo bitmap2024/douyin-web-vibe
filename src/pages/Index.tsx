@@ -5,9 +5,11 @@ import SideNav from "@/components/SideNav";
 
 const Index: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <VideoFeed />
-      <SideNav />
+    <div className="min-h-screen bg-black">
+      <div className="max-w-screen-md mx-auto relative">
+        <VideoFeed />
+        <SideNav />
+      </div>
     </div>
   );
 };

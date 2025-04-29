@@ -24,23 +24,23 @@ interface CommentSectionProps {
 const DUMMY_COMMENTS: CommentProps[] = [
   {
     id: "1",
-    username: "user123",
+    username: "抖音用户123456",
     avatar: "",
-    content: "这条视频太棒了！",
+    content: "这个视频太棒了！",
     likes: 1245,
     timestamp: "3小时前",
   },
   {
     id: "2",
-    username: "douyin_fan",
+    username: "旅行爱好者",
     avatar: "",
-    content: "哪里可以买到同款？",
+    content: "哪里拍的？想去",
     likes: 872,
     timestamp: "2小时前",
   },
   {
     id: "3",
-    username: "creator_loves",
+    username: "创作者666",
     avatar: "",
     content: "拍的真好看，请问用的什么滤镜？",
     likes: 543,
@@ -48,9 +48,9 @@ const DUMMY_COMMENTS: CommentProps[] = [
   },
   {
     id: "4",
-    username: "random_user",
+    username: "音乐达人",
     avatar: "",
-    content: "跪求BGM是什么歌？",
+    content: "BGM是什么歌？好听",
     likes: 267,
     timestamp: "45分钟前",
   },
@@ -69,7 +69,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (newComment.trim()) {
       const comment: CommentProps = {
         id: Date.now().toString(),
-        username: "你自己",
+        username: "你",
         avatar: "",
         content: newComment,
         likes: 0,
@@ -105,23 +105,23 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[80vh] p-0 rounded-t-xl">
-        <SheetHeader className="px-4 py-4 border-b">
-          <SheetTitle className="text-center">
+      <SheetContent side="bottom" className="h-[80vh] p-0 rounded-t-xl bg-white">
+        <SheetHeader className="px-4 py-3 border-b border-gray-100">
+          <SheetTitle className="text-center text-black">
             {comments.length} 条评论
           </SheetTitle>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto h-[calc(80vh-140px)] px-4 py-2">
+        <div className="flex-1 overflow-y-auto h-[calc(80vh-130px)] px-4 py-2">
           {comments.map((comment) => (
-            <div key={comment.id} className="flex py-3">
+            <div key={comment.id} className="flex py-3 border-b border-gray-100">
               <Avatar className="h-10 w-10 mr-3">
                 <AvatarImage src={comment.avatar} />
                 <AvatarFallback>{comment.username[0]}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="text-sm text-muted-foreground">{comment.username}</p>
-                <p className="text-md py-0.5">{comment.content}</p>
-                <div className="flex items-center text-xs text-muted-foreground">
+                <p className="text-sm text-gray-500">{comment.username}</p>
+                <p className="text-sm py-1 text-black">{comment.content}</p>
+                <div className="flex items-center text-xs text-gray-400">
                   <span>{comment.timestamp}</span>
                   <button
                     className="ml-4 flex items-center"
@@ -137,27 +137,33 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               >
                 <Heart
                   size={16}
-                  fill={likedComments.has(comment.id) ? "hsl(var(--primary))" : "transparent"}
+                  fill={likedComments.has(comment.id) ? "#fe2c55" : "transparent"}
                   className={
-                    likedComments.has(comment.id) ? "text-primary" : "text-muted-foreground"
+                    likedComments.has(comment.id) ? "text-[#fe2c55]" : "text-gray-400"
                   }
                 />
-                <span className="text-xs mt-1 text-muted-foreground">
+                <span className="text-xs mt-1 text-gray-400">
                   {comment.likes}
                 </span>
               </button>
             </div>
           ))}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 border-t bg-background px-4 py-2">
+        <div className="absolute bottom-0 left-0 right-0 border-t bg-white px-4 py-3">
           <div className="flex space-x-2">
             <Input
               placeholder="添加评论..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="flex-1"
+              className="flex-1 rounded-full bg-gray-100 border-none"
             />
-            <Button onClick={handleSendComment}>发送</Button>
+            <Button 
+              onClick={handleSendComment}
+              className={`${newComment.trim() ? 'bg-[#fe2c55]' : 'bg-gray-200 text-gray-400'} hover:bg-[#fe2c55]/90`}
+              disabled={!newComment.trim()}
+            >
+              发送
+            </Button>
           </div>
         </div>
       </SheetContent>
