@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Heart, MessageCircle, Star, Share } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface ActionBarProps {
   video: {
@@ -9,6 +10,7 @@ interface ActionBarProps {
     comments: number;
     favorites: number;
     shares: number;
+    username?: string;
   };
 }
 
@@ -78,14 +80,17 @@ const ActionBar: React.FC<ActionBarProps> = ({ video }) => {
         </span>
       </div>
 
-      <div className="flex flex-col items-center">
-        <button className="rounded-full bg-white p-2">
+      <div className="flex flex-col items-center relative">
+        <Link 
+          to={`/user/${video.username || 'default'}`} 
+          className="rounded-full bg-white p-2"
+        >
           <img 
             src="public/lovable-uploads/f4eba2f8-ee2a-41e8-82bf-7eaa3c9461f8.png" 
             alt="Profile" 
             className="h-8 w-8 rounded-full object-cover"
           />
-        </button>
+        </Link>
         <span className="bg-[#fe2c55] rounded-full h-5 w-5 flex items-center justify-center text-white text-xs absolute -top-1 -right-1">+</span>
       </div>
     </div>
