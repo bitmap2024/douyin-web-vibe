@@ -5,7 +5,11 @@ import LeftSidebar from "@/components/LeftSidebar";
 import Header from "@/components/Header";
 import VideoControls from "@/components/VideoControls";
 
-const Index: React.FC = () => {
+interface IndexProps {
+  openLogin: () => void;
+}
+
+const Index: React.FC<IndexProps> = ({ openLogin }) => {
   return (
     <div className="min-h-screen bg-[#121212]">
       <Header />

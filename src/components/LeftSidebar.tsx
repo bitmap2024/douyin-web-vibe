@@ -39,7 +39,7 @@ const LeftSidebar: React.FC = () => {
     { icon: "👤", label: "关注", id: "following" },
     { icon: "👥", label: "朋友", id: "friends" },
     { icon: "👤", label: "我的", id: "profile" },
-    { icon: "🎮", label: "暗区偷游", id: "games" },
+    { icon: "💰", label: "定价", id: "pricing" },
     { icon: "📺", label: "直播", id: "live" },
     { icon: "🎬", label: "放映厅", id: "theater" },
     { icon: "🎭", label: "短剧", id: "drama" },

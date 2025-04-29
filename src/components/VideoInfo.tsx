@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -21,14 +20,6 @@ const VideoInfo: React.FC<VideoInfoProps> = ({ video }) => {
   return (
     <div className="absolute bottom-16 left-4 right-[120px] z-20">
       <div className="flex items-center space-x-2">
-        <Link to={`/user/${video.username}`}>
-          <Avatar className="h-12 w-12 border-2 border-white ring-1 ring-primary">
-            <AvatarImage src={video.avatar} />
-            <AvatarFallback>
-              {video.username.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </Link>
         <div className="flex items-center space-x-2">
           <Link to={`/user/${video.username}`} className="text-white font-medium">@{video.username}</Link>
           <span className="text-gray-300 text-sm">· {video.date}</span>
