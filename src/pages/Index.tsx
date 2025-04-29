@@ -1,14 +1,22 @@
 
 import React from "react";
 import VideoFeed from "@/components/VideoFeed";
-import SideNav from "@/components/SideNav";
+import LeftSidebar from "@/components/LeftSidebar";
+import Header from "@/components/Header";
+import VideoControls from "@/components/VideoControls";
 
 const Index: React.FC = () => {
   return (
-    <div className="min-h-screen bg-black">
-      <div className="max-w-screen-md mx-auto relative">
-        <VideoFeed />
-        <SideNav />
+    <div className="min-h-screen bg-[#121212]">
+      <Header />
+      <div className="flex">
+        <LeftSidebar />
+        <div className="flex-1">
+          <VideoFeed />
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-transparent">
+        <VideoControls />
       </div>
     </div>
   );
