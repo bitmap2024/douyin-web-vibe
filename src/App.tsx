@@ -6,11 +6,30 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import UserProfile from "./pages/UserProfile";
+import Following from "./pages/Following";
+import Trending from "./pages/Trending";
+import LikedVideos from "./pages/LikedVideos";
+import KnowledgeBaseDetail from "./pages/KnowledgeBaseDetail";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EmailLoginForm from "./components/EmailLoginForm";
+import Pricing from "./pages/Pricing";
+import AIAssistant from "./components/AIAssistant";
+import { useCurrentUser } from "./lib/api";
+import Messages from "./pages/Messages";
+import MessageDetail from "./pages/MessageDetail";
+import Recommend from "./pages/Recommend";
+import Featured from "./pages/Featured";
+import Spark from "./pages/Spark";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -31,11 +50,23 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index openLogin={openLogin} />} />
+            <Route path="/user/me" element={<UserProfile isCurrentUser={true} />} />
             <Route path="/user/:username" element={<UserProfile />} />
+            <Route path="/following" element={<Following />} />
+            <Route path="/trending" element={<Trending />} />
+            <Route path="/recommend" element={<Recommend />} />
+            <Route path="/featured" element={<Featured />} />
+            <Route path="/spark" element={<Spark />} />
+            <Route path="/liked-videos" element={<LikedVideos />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/knowledge-base/:kbId" element={<KnowledgeBaseDetail />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:userId" element={<MessageDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <AIAssistant />
       </TooltipProvider>
     </QueryClientProvider>
   );

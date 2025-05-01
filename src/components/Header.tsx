@@ -1,10 +1,13 @@
-
 import React from "react";
 import { Search } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onLoginClick: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-[#121212] z-50 flex items-center justify-between px-4 border-b border-gray-800">
       <div className="flex items-center space-x-2">
@@ -13,14 +16,14 @@ const Header: React.FC = () => {
           <rect x="17" y="29" width="10" height="3" fill="white"/>
           <path d="M37.5 28V19C37.5 11.56 31.44 5.5 24 5.5C16.56 5.5 10.5 11.56 10.5 19V28C10.5 35.44 16.56 41.5 24 41.5C31.44 41.5 37.5 35.44 37.5 28ZM33.5 19.17V27.83C33.5 33.23 29.4 37.5 24 37.5C18.6 37.5 14.5 33.23 14.5 27.83V19.17C14.5 13.77 18.6 9.5 24 9.5C29.4 9.5 33.5 13.77 33.5 19.17Z" fill="#00F2EA"/>
         </svg>
-        <span className="text-white text-xl font-bold">抖音</span>
+        <span className="text-white text-xl font-bold">Spark Hub</span>
       </div>
       
       <div className="flex-1 max-w-md mx-auto">
         <div className="relative">
           <input 
             type="text"
-            placeholder="我的幸福婚约"
+            placeholder="搜索..."
             className="w-full bg-[#2a2a2a] rounded-full py-2 pl-4 pr-10 text-white focus:outline-none"
           />
           <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white">
@@ -31,17 +34,12 @@ const Header: React.FC = () => {
       
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-5">
-          <div className="flex flex-col items-center">
-            <span className="text-[#2F80ED] text-xs">NEW</span>
-            <span className="text-gray-300 text-xs">充钻石</span>
-          </div>
-          <span className="text-gray-300 text-xs">客户端</span>
-          <span className="text-gray-300 text-xs">星图</span>
-          <span className="text-gray-300 text-xs">薯店</span>
-          <span className="text-gray-300 text-xs">灰飞</span>
-          <span className="text-gray-300 text-xs">校园</span>
+          <Link to="/pricing" className="text-gray-300 text-sm hover:text-white cursor-pointer">定价</Link>
         </div>
-        <Button className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white rounded-full px-6">
+        <Button 
+          onClick={onLoginClick}
+          className="bg-[#fe2c55] hover:bg-[#fe2c55]/90 text-white rounded-full px-6"
+        >
           登录
         </Button>
       </div>

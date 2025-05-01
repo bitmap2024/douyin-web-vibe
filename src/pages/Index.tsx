@@ -1,27 +1,21 @@
-
-import React from "react";
-import VideoFeed from "@/components/VideoFeed";
-import LeftSidebar from "@/components/LeftSidebar";
-import Header from "@/components/Header";
-import VideoControls from "@/components/VideoControls";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface IndexProps {
   openLogin: () => void;
 }
 
 const Index: React.FC<IndexProps> = ({ openLogin }) => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    // 自动重定向到推荐页面
+    navigate("/recommend");
+  }, [navigate]);
+  
   return (
-    <div className="min-h-screen bg-[#121212]">
-      <Header />
-      <div className="flex">
-        <LeftSidebar />
-        <div className="flex-1">
-          <VideoFeed />
-        </div>
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-transparent">
-        <VideoControls />
-      </div>
+    <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+      <div className="text-white">加载中...</div>
     </div>
   );
 };

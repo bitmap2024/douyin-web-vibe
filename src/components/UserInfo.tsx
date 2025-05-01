@@ -1,8 +1,8 @@
-
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface UserInfoProps {
   username: string;
@@ -19,10 +19,19 @@ const UserInfo: React.FC<UserInfoProps> = ({
   avatarSrc,
   musicName,
 }) => {
+  const navigate = useNavigate();
+
+  const handleAvatarClick = () => {
+    navigate(`/user/${username}`);
+  };
+
   return (
     <div className="absolute bottom-24 left-4 z-20 w-[calc(100%-100px)]">
       <div className="flex items-center space-x-2 mb-3">
-        <Avatar className="h-12 w-12 border-2 border-white ring-1 ring-primary">
+        <Avatar 
+          className="h-12 w-12 border-2 border-white ring-1 ring-primary cursor-pointer" 
+          onClick={handleAvatarClick}
+        >
           <AvatarImage src={avatarSrc} />
           <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
         </Avatar>

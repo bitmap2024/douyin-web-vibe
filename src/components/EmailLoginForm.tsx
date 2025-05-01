@@ -1,92 +1,77 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { X } from "lucide-react";
 
-const formSchema = z.object({
-  email: z.string().email("请输入有效的邮箱地址"),
-  password: z.string().min(6, "密码至少需要6个字符"),
-});
-
-const EmailLoginForm: React.FC<{
+interface EmailLoginFormProps {
   onClose: () => void;
-}> = ({ onClose }) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+}
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast.success("登录成功!");
-    onClose();
-  }
+const EmailLoginForm: React.FC<EmailLoginFormProps> = ({ onClose }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      // TODO: Implement actual login logic here
+      console.log("Login attempt with:", { email, password });
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      onClose();
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4 text-center">邮箱登录</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>邮箱</FormLabel>
-                <FormControl>
-                  <Input placeholder="请输入邮箱" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>密码</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="请输入密码" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full bg-[#fe2c55] hover:bg-[#fe2c55]/90">
-            登录
-          </Button>
-        </form>
-      </Form>
-      <div className="mt-4 text-center">
-        <p className="text-sm text-gray-500">其他登录方式</p>
-        <div className="flex justify-center space-x-4 mt-2">
-          <Button variant="outline" size="icon">
-            微信
-          </Button>
-          <Button variant="outline" size="icon">
-            QQ
-          </Button>
-          <Button variant="outline" size="icon">
-            微博
-          </Button>
-        </div>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">登录</h2>
+        <Button variant="ghost" size="icon" onClick={onClose}>
+          <X className="h-4 w-4" />
+        </Button>
       </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">邮箱</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="请输入邮箱"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="password">密码</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="请输入密码"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        
+        <Button 
+          type="submit" 
+          className="w-full bg-[#fe2c55] hover:bg-[#fe2c55]/90"
+          disabled={isLoading}
+        >
+          {isLoading ? "登录中..." : "登录"}
+        </Button>
+      </form>
     </div>
   );
 };

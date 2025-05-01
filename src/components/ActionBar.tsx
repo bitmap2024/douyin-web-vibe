@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Heart, MessageCircle, Star, Share } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -12,6 +11,7 @@ interface ActionBarProps {
     favorites: number;
     shares: number;
     username?: string;
+    avatar?: string;
   };
 }
 
@@ -90,12 +90,12 @@ const ActionBar: React.FC<ActionBarProps> = ({ video }) => {
         <div className="flex flex-col items-center relative">
           <Link 
             to={`/user/${video.username || 'default'}`} 
-            className="rounded-full bg-white p-2"
+            className="rounded-full bg-white p-0 overflow-hidden"
           >
             <img 
-              src="public/lovable-uploads/f4eba2f8-ee2a-41e8-82bf-7eaa3c9461f8.png" 
-              alt="Profile" 
-              className="h-8 w-8 rounded-full object-cover"
+              src={video.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=1"}
+              alt={`${video.username || 'User'} Profile`} 
+              className="h-10 w-10 rounded-full object-cover"
             />
           </Link>
           <span className="bg-[#fe2c55] rounded-full h-5 w-5 flex items-center justify-center text-white text-xs absolute -top-1 -right-1">+</span>

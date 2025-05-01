@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import VideoPlayer from "./VideoPlayer";
 import ActionBar from "./ActionBar";
@@ -26,7 +25,7 @@ const DUMMY_VIDEOS: Video[] = [
     id: "1",
     src: "https://assets.mixkit.co/videos/preview/mixkit-young-woman-practicing-yoga-at-sunset-39760-large.mp4",
     username: "月下宅女",
-    avatar: "",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=月下宅女",
     date: "3月6日",
     title: "没后续，快跑",
     hashtags: ["因为一个片段看了整部剧", "好剧推荐", "超好看的剧强烈推荐"],
@@ -42,7 +41,7 @@ const DUMMY_VIDEOS: Video[] = [
     id: "2",
     src: "https://assets.mixkit.co/videos/preview/mixkit-waves-coming-to-the-beach-5016-large.mp4",
     username: "travel_world",
-    avatar: "",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=travel_world",
     date: "3月5日",
     title: "一剪梅，快跑",
     hashtags: ["旅行", "海滩", "夏天"],
@@ -55,7 +54,7 @@ const DUMMY_VIDEOS: Video[] = [
     id: "3",
     src: "https://assets.mixkit.co/videos/preview/mixkit-top-aerial-shot-of-seashore-with-rocks-1090-large.mp4",
     username: "drone_master",
-    avatar: "",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=drone_master",
     date: "3月4日",
     title: "做人要听劝，快走",
     hashtags: ["航拍", "海岸", "自然"],

@@ -1,6 +1,6 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -32,18 +32,48 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick, count
 
 const LeftSidebar: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState("recommend");
+  const navigate = useNavigate();
 
   const NavItemsList = [
+    { icon: "✨", label: "Spark", id: "spark" },
     { icon: "🔎", label: "精选", id: "featured" },
     { icon: "👍", label: "推荐", id: "recommend" },
+    { icon: "📈", label: "趋势", id: "trending" },
     { icon: "👤", label: "关注", id: "following" },
     { icon: "👥", label: "朋友", id: "friends" },
     { icon: "👤", label: "我的", id: "profile" },
-    { icon: "💰", label: "定价", id: "pricing" },
-    { icon: "📺", label: "直播", id: "live" },
-    { icon: "🎬", label: "放映厅", id: "theater" },
-    { icon: "🎭", label: "短剧", id: "drama" },
+   
   ];
+
+  const handleNavClick = (id: string) => {
+    setActiveTab(id);
+    
+    // 根据不同的导航项执行不同的操作
+    switch (id) {
+      case "following":
+        navigate("/following");
+        break;
+      case "profile":
+        navigate("/user/me");
+        break;
+      case "trending":
+        navigate("/trending");
+        break;
+      case "recommend":
+        navigate("/recommend");
+        break;
+      case "featured":
+        navigate("/featured");
+        break;
+      case "spark":
+        navigate("/spark");
+        break;
+      // 其他导航项的处理可以在这里添加
+      default:
+        // 默认行为，可以留空或添加其他逻辑
+        break;
+    }
+  };
 
   return (
     <div className="fixed left-0 top-16 bottom-0 w-64 bg-[#121212] border-r border-gray-800 overflow-y-auto pt-4 pb-20 z-40">
@@ -53,7 +83,7 @@ const LeftSidebar: React.FC = () => {
           icon={item.icon}
           label={item.label}
           isActive={activeTab === item.id}
-          onClick={() => setActiveTab(item.id)}
+          onClick={() => handleNavClick(item.id)}
         />
       ))}
     </div>

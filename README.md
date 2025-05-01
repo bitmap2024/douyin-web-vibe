@@ -1,73 +1,94 @@
-# Welcome to your Lovable project
+# SparkHub 前端
 
-## Project info
+这是 SparkHub 项目的前端部分，使用 React、TypeScript 和 Vite 构建。
 
-**URL**: https://lovable.dev/projects/07eecf83-f959-4a21-9afe-479af1e99170
+## 功能特点
 
-## How can I edit this code?
+- 用户认证（登录/注册）
+- 用户个人资料
+- 关注/取消关注用户
+- 知识库管理
+- 私信系统
+- 响应式设计
 
-There are several ways of editing your application.
+## 技术栈
 
-**Use Lovable**
+- React 18
+- TypeScript
+- Vite
+- React Router
+- React Query
+- Tailwind CSS
+- Shadcn UI
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/07eecf83-f959-4a21-9afe-479af1e99170) and start prompting.
+## 开发环境设置
 
-Changes made via Lovable will be committed automatically to this repo.
+### 前提条件
 
-**Use your preferred IDE**
+- Node.js 16+
+- npm 或 yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 安装依赖
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+npm install
+# 或
+yarn
 ```
 
-**Edit a file directly in GitHub**
+### 环境变量配置
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+创建 `.env` 文件（基于 `.env.example`）：
 
-**Use GitHub Codespaces**
+```
+# 是否使用模拟数据（true 表示使用模拟数据，false 表示使用真实 API）
+VITE_USE_MOCK_DATA=true
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# API 基础 URL
+VITE_API_BASE_URL=http://localhost:8000/api
+```
 
-## What technologies are used for this project?
+### 启动开发服务器
 
-This project is built with:
+```bash
+npm run dev
+# 或
+yarn dev
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 构建生产版本
 
-## How can I deploy this project?
+```bash
+npm run build
+# 或
+yarn build
+```
 
-Simply open [Lovable](https://lovable.dev/projects/07eecf83-f959-4a21-9afe-479af1e99170) and click on Share -> Publish.
+## 项目结构
 
-## Can I connect a custom domain to my Lovable project?
+```
+src/
+├── components/     # 可复用组件
+├── lib/            # 工具函数和 API 客户端
+├── pages/          # 页面组件
+├── hooks/          # 自定义 React Hooks
+├── App.tsx         # 主应用组件
+└── main.tsx        # 入口文件
+```
 
-Yes, you can!
+## 前后端分离
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+本项目支持完全的前后端分离：
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+1. 当 `VITE_USE_MOCK_DATA=true` 时，前端使用模拟数据，不依赖后端服务
+2. 当 `VITE_USE_MOCK_DATA=false` 时，前端通过 API 与后端通信
+
+这使得前端开发人员可以在后端服务未就绪的情况下进行开发和测试。
+
+## 贡献指南
+
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 创建 Pull Request
