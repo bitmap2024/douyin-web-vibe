@@ -1,147 +1,77 @@
-import React from "react";
-import Header from "@/components/Header";
+
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Heart, Play, User } from "lucide-react";
+import Header from "@/components/Header";
+import LeftSidebar from "@/components/LeftSidebar";
+import { useCurrentUser } from "@/lib/api";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import EmailLoginForm from "@/components/EmailLoginForm";
 
-const LikedVideos: React.FC = () => {
+const LikedVideos = () => {
   const navigate = useNavigate();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { data: currentUser, isLoading } = useCurrentUser();
   
-  // 模拟点赞视频数据
-  const likedVideos = [
-    {
-      id: 1,
-      title: "超萌猫咪日常",
-      author: "猫咪爱好者",
-      authorAvatar: "",
-      thumbnail: "https://placehold.co/300x400/333/FFF?text=猫咪视频",
-      likes: 12500,
-      views: 45000,
-      duration: "0:45"
-    },
-    {
-      id: 2,
-      title: "美食制作教程",
-      author: "美食达人",
-      authorAvatar: "",
-      thumbnail: "https://placehold.co/300x400/333/FFF?text=美食视频",
-      likes: 8900,
-      views: 32000,
-      duration: "3:20"
-    },
-    {
-      id: 3,
-      title: "旅行日记 - 日本",
-      author: "旅行家",
-      authorAvatar: "",
-      thumbnail: "https://placehold.co/300x400/333/FFF?text=旅行视频",
-      likes: 15600,
-      views: 52000,
-      duration: "5:15"
-    },
-    {
-      id: 4,
-      title: "舞蹈表演",
-      author: "舞蹈工作室",
-      authorAvatar: "",
-      thumbnail: "https://placehold.co/300x400/333/FFF?text=舞蹈视频",
-      likes: 21000,
-      views: 78000,
-      duration: "2:30"
-    },
-    {
-      id: 5,
-      title: "科技产品评测",
-      author: "科技达人",
-      authorAvatar: "",
-      thumbnail: "https://placehold.co/300x400/333/FFF?text=科技视频",
-      likes: 9800,
-      views: 35000,
-      duration: "8:45"
-    },
-    {
-      id: 6,
-      title: "搞笑日常",
-      author: "搞笑博主",
-      authorAvatar: "",
-      thumbnail: "https://placehold.co/300x400/333/FFF?text=搞笑视频",
-      likes: 32000,
-      views: 120000,
-      duration: "1:15"
-    }
-  ];
-
-  const handleVideoClick = (videoId: number) => {
-    // 在实际应用中，这里会导航到视频详情页
-    console.log(`查看视频 ${videoId}`);
+  const handleLoginClick = () => {
+    setIsLoginOpen(true);
   };
 
-  const handleAuthorClick = (author: string) => {
-    // 在实际应用中，这里会导航到作者主页
-    navigate(`/user/${author}`);
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+        <div className="text-white">加载中...</div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-[#121212] flex">
+        <Header onLoginClick={handleLoginClick} />
+        <LeftSidebar />
+        <div className="flex-1 ml-64 mt-16 flex flex-col items-center justify-center text-white">
+          <div className="text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 text-gray-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <h2 className="mt-6 text-2xl font-bold">请登录查看</h2>
+            <p className="mt-2 text-gray-400">登录后才能查看你喜欢的视频</p>
+            <button 
+              onClick={handleLoginClick}
+              className="mt-6 bg-[#fe2c55] text-white px-8 py-3 rounded-full hover:bg-[#fe2c55]/90 transition"
+            >
+              立即登录
+            </button>
+          </div>
+        </div>
+        
+        <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+          <DialogContent className="sm:max-w-md">
+            <EmailLoginForm onClose={() => setIsLoginOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#121212]">
-      <Header />
-      <div className="pt-16 px-4">
-        <div className="flex items-center mt-6">
-          <h1 className="text-2xl font-bold text-white">我点赞的视频</h1>
-          <div className="ml-4 flex items-center text-gray-400">
-            <Heart className="h-5 w-5 mr-1" />
-            <span>{likedVideos.length} 个视频</span>
-          </div>
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {likedVideos.map((video) => (
-            <div 
-              key={video.id} 
-              className="bg-[#1e1e1e] rounded-lg overflow-hidden cursor-pointer hover:bg-[#2a2a2a] transition-colors"
-              onClick={() => handleVideoClick(video.id)}
-            >
-              <div className="relative">
-                <img 
-                  src={video.thumbnail} 
-                  alt={video.title} 
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-1 py-0.5 rounded">
-                  {video.duration}
-                </div>
-                <div className="absolute top-2 right-2 bg-black/70 text-white p-1 rounded-full">
-                  <Play className="h-4 w-4" />
-                </div>
-              </div>
-              <div className="p-3">
-                <h3 className="text-white font-medium line-clamp-2">{video.title}</h3>
-                <div 
-                  className="flex items-center mt-2 text-gray-400 text-sm cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAuthorClick(video.author);
-                  }}
-                >
-                  <Avatar className="h-5 w-5 mr-2">
-                    <AvatarImage src={video.authorAvatar} />
-                    <AvatarFallback className="text-xs">{video.author.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span>{video.author}</span>
-                </div>
-                <div className="flex items-center mt-2 text-gray-400 text-xs">
-                  <Heart className="h-3 w-3 mr-1" />
-                  <span>{video.likes.toLocaleString()}</span>
-                  <span className="mx-2">•</span>
-                  <span>{video.views.toLocaleString()} 次观看</span>
-                </div>
-              </div>
-            </div>
-          ))}
+      <Header onLoginClick={handleLoginClick} />
+      <LeftSidebar />
+      <div className="ml-64 mt-16 p-8">
+        <h1 className="text-2xl font-bold text-white mb-6">我喜欢的视频</h1>
+        
+        <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+          <svg width="64" height="64" fill="none" viewBox="0 0 48 48">
+            <rect width="48" height="48" rx="24" fill="#232526"/>
+            <path d="M24 16v8m0 0v4m0-4h4m-4 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/>
+          </svg>
+          <p className="mt-4">暂无喜欢的视频</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default LikedVideos; 
+export default LikedVideos;

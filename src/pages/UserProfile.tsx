@@ -60,7 +60,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
   
   // Get data for the profile user
   const { data: userDataByUsername, isLoading: isUserByUsernameLoading } = useUserByUsername(
-    isCurrentUser ? "" : username || ""
+    username || ""
   );
   
   // Determine user ID for profile - from username or use 0 for current user
@@ -69,11 +69,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
     : (userDataByUsername?.id || parseInt(username?.replace(/\D/g, '') || "1"));
   
   // Get user data - either current user or specified user
-  const { data: userData, isLoading: isUserLoading } = isCurrentUser 
-    ? { data: currentUserData, isLoading: isCurrentUserLoading } 
-    : userDataByUsername 
-      ? { data: userDataByUsername, isLoading: isUserByUsernameLoading } 
-      : useUser(userId);
+  const userData = isCurrentUser 
+    ? currentUserData 
+    : userDataByUsername;
+  
+  const isUserLoading = isCurrentUser 
+    ? isCurrentUserLoading 
+    : isUserByUsernameLoading;
   
   // Get knowledge bases for the user
   const { data: knowledgeBases, isLoading: isKnowledgeBasesLoading } = isCurrentUser 
