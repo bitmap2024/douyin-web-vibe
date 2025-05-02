@@ -5,15 +5,15 @@ import { User, Message, Conversation, Paper, KnowledgeBase } from './types';
 
 // 模拟用户数据
 export const users = [
-  { id: 1, username: "用户1", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=1", followers: 120, following: 45 },
-  { id: 2, username: "用户2", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=2", followers: 85, following: 32 },
-  { id: 3, username: "用户3", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=3", followers: 210, following: 67 },
-  { id: 4, username: "用户4", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=4", followers: 95, following: 28 },
-  { id: 5, username: "用户5", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=5", followers: 150, following: 53 },
+  { id: 1, username: "用户1", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=1", followers: 120, following: 45, location: "北京", experience: "互联网从业者，热爱技术分享" },
+  { id: 2, username: "用户2", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=2", followers: 85, following: 32, location: "上海", experience: "人工智能研究员，专注机器学习" },
+  { id: 3, username: "用户3", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=3", followers: 210, following: 67, location: "广州", experience: "数据科学家，擅长数据分析与可视化" },
+  { id: 4, username: "用户4", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=4", followers: 95, following: 28, location: "深圳", experience: "全栈开发工程师，喜欢探索新技术" },
+  { id: 5, username: "用户5", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=5", followers: 150, following: 53, location: "杭州", experience: "产品经理，关注用户体验与产品设计" },
   // 视频作者用户
-  { id: 101, username: "月下宅女", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=月下宅女", followers: 49000, following: 120 },
-  { id: 102, username: "travel_world", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=travel_world", followers: 30500, following: 210 },
-  { id: 103, username: "drone_master", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=drone_master", followers: 78900, following: 150 },
+  { id: 101, username: "月下宅女", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=月下宅女", followers: 49000, following: 120, location: "成都", experience: "生活博主，分享美食与生活日常" },
+  { id: 102, username: "travel_world", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=travel_world", followers: 30500, following: 210, location: "环球旅行中", experience: "旅行博主，足迹遍布全球，分享旅行经验与摄影技巧" },
+  { id: 103, username: "drone_master", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=drone_master", followers: 78900, following: 150, location: "西安", experience: "航拍达人，专注分享无人机航拍技巧与视频" },
 ];
 
 // 模拟当前登录用户
@@ -23,7 +23,9 @@ let currentUser = {
   avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=current",
   followers: 0,
   following: 0,
-  followingList: [] as number[]
+  followingList: [] as number[],
+  location: "北京",
+  experience: "热爱分享知识，构建个人知识库"
 };
 
 // 模拟知识库数据
@@ -236,7 +238,9 @@ export const getUser = async (userId: number) => {
       username: `用户${userId}`,
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
       followers: Math.floor(Math.random() * 10000),
-      following: Math.floor(Math.random() * 200)
+      following: Math.floor(Math.random() * 200),
+      location: "未知地区",
+      experience: "这个用户还没有填写个人介绍"
     };
   } else {
     return realUserApi.getUser(userId);
@@ -263,7 +267,9 @@ export const getUserByUsername = async (username: string) => {
       username: username || "未知用户",
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username || Math.random()}`,
       followers: Math.floor(Math.random() * 10000),
-      following: Math.floor(Math.random() * 200)
+      following: Math.floor(Math.random() * 200),
+      location: "未知地区",
+      experience: "这个用户还没有填写个人介绍"
     };
   } else {
     return realUserApi.getUserByUsername(username);
@@ -335,7 +341,7 @@ export const unfollowUser = async (userId: number): Promise<boolean> => {
   }
 };
 
-// 检查是否已关注
+// 检���是否已关注
 export const isFollowing = async (userId: number) => {
   if (config.useMockData) {
     return currentUser.followingList.includes(userId);
