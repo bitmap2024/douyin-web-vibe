@@ -6,6 +6,8 @@ export interface User {
   followers: number;
   following: number;
   followingList?: number[];
+  location?: string;
+  experience?: string;
 }
 
 // 消息类型
@@ -49,4 +51,4 @@ export interface KnowledgeBase {
   tags: string[];
   stars: number;
   forks: number;
-} 
+}
