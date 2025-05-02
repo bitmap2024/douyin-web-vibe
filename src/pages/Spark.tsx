@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import LeftSidebar from "@/components/LeftSidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Paperclip, Import, Globe, ChevronUp } from "lucide-react";
+import { Paperclip, Import, Globe, ChevronUp, Search, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useCurrentUser, useSearchPapers, useCreateKnowledgeBase } from "@/lib/api";
+import { Paper } from "@/lib/types";
 
 // 模拟项目类型
 interface ProjectType {
@@ -15,11 +18,101 @@ interface ProjectType {
 
 const Spark: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTrigger, setSearchTrigger] = useState("");
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { data: currentUser } = useCurrentUser();
+  
+  // 使用React Query hooks
+  const { 
+    data: searchResults = [], 
+    isLoading: isSearching, 
+    error: searchError
+  } = useSearchPapers(searchTrigger);
+  
+  const { 
+    mutate: createKnowledgeBase, 
+    isPending: isCreating 
+  } = useCreateKnowledgeBase();
   
   const handleLoginClick = () => {
     setIsLoginOpen(true);
   };
+  
+  const handleSearch = useCallback(() => {
+    if (!searchInput.trim()) {
+      toast({
+        title: "请输入搜索内容",
+        description: "请输入关键词或研究领域描述",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSearchTrigger(searchInput);
+  }, [searchInput, toast]);
+  
+  const handleCreateKnowledgeBase = useCallback(() => {
+    if (!currentUser) {
+      setIsLoginOpen(true);
+      return;
+    }
+    
+    if (searchResults.length === 0) {
+      toast({
+        title: "创建失败",
+        description: "请先搜索并获取论文",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // 从搜索词生成知识库标题和描述
+    const title = `${searchInput}研究集锦`;
+    const description = `关于${searchInput}的学术研究和前沿探索`;
+    
+    // 从搜索结果提取标签
+    const tags = searchInput.split(/\s+/).filter(tag => tag.length > 1);
+    
+    createKnowledgeBase(
+      {
+        title,
+        description,
+        papers: searchResults,
+        tags
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "创建成功",
+            description: "知识库已成功创建",
+          });
+          
+          // 跳转到用户主页
+          navigate(`/user/${currentUser.username}`);
+        },
+        onError: (error) => {
+          toast({
+            title: "创建失败",
+            description: "创建知识库时发生错误，请稍后再试",
+            variant: "destructive"
+          });
+        }
+      }
+    );
+  }, [searchResults, searchInput, currentUser, createKnowledgeBase, toast, navigate]);
+  
+  // 如果搜索出错，显示错误
+  React.useEffect(() => {
+    if (searchError) {
+      toast({
+        title: "搜索失败",
+        description: "未能获取相关论文，请稍后再试",
+        variant: "destructive"
+      });
+    }
+  }, [searchError, toast]);
   
   // 模拟项目类型数据
   const projectTypes: ProjectType[] = [
@@ -50,6 +143,8 @@ const Spark: React.FC = () => {
               <textarea
                 placeholder="开始创建知识库，描述您的研究领域、兴趣或想法..."
                 className="w-full bg-transparent text-white border-none focus:outline-none text-lg min-h-[140px] resize-none"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
               />
               
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
@@ -69,13 +164,75 @@ const Spark: React.FC = () => {
                     <Globe size={16} />
                     <span>公开</span>
                   </Button>
-                  <Button variant="default" className="bg-gradient-to-r from-blue-600 to-pink-600 text-white rounded-lg px-6">
-                    创建
+                  <Button 
+                    variant="default" 
+                    className="bg-gradient-to-r from-blue-600 to-pink-600 text-white rounded-lg px-6"
+                    onClick={handleSearch}
+                    disabled={isSearching}
+                  >
+                    {isSearching ? (
+                      <>
+                        <Loader2 size={16} className="mr-2 animate-spin" />
+                        <span>检索中...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Search size={16} className="mr-2" />
+                        <span>检索</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
             </div>
           </div>
+          
+          {/* 搜索结果展示 */}
+          {searchResults.length > 0 && (
+            <div className="bg-[#1e1e1e]/80 rounded-xl p-6 mb-8 border border-gray-800 shadow-xl text-left">
+              <h2 className="text-xl font-semibold text-white mb-4">搜索结果 ({searchResults.length})</h2>
+              
+              <div className="space-y-6">
+                {searchResults.map((paper) => (
+                  <div key={paper.id} className="border-b border-gray-700 pb-4 last:border-0">
+                    <h3 className="text-lg font-medium text-white">{paper.title}</h3>
+                    <p className="text-sm text-gray-400 mt-1">
+                      {paper.authors.join(', ')} • {paper.publishDate}
+                    </p>
+                    <p className="text-gray-300 mt-2 text-sm">
+                      {paper.abstract.length > 200 
+                        ? `${paper.abstract.substring(0, 200)}...` 
+                        : paper.abstract
+                      }
+                    </p>
+                    {paper.doi && (
+                      <p className="text-xs text-blue-400 mt-2">
+                        DOI: {paper.doi}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-6 text-center">
+                <Button
+                  variant="default"
+                  className="bg-gradient-to-r from-blue-600 to-pink-600 text-white rounded-lg px-8 py-2"
+                  onClick={handleCreateKnowledgeBase}
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2 size={16} className="mr-2 animate-spin" />
+                      <span>创建中...</span>
+                    </>
+                  ) : (
+                    <span>创建知识库</span>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
           
           {/* 模板选择 */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full mt-4">

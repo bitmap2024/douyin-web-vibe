@@ -113,4 +113,19 @@ export const realKnowledgeBaseApi = {
     const response = await apiClient.post<any>(`/knowledge-bases/${kbId}/papers`, paper);
     return response.data;
   }
+};
+
+// 论文相关 API
+export const realPaperApi = {
+  // 搜索论文
+  searchPapers: async (query: string) => {
+    const response = await apiClient.get<any[]>(`/papers/search?q=${encodeURIComponent(query)}`);
+    return response.data;
+  },
+  
+  // 获取论文详情
+  getPaper: async (paperId: number) => {
+    const response = await apiClient.get<any>(`/papers/${paperId}`);
+    return response.data;
+  }
 }; 

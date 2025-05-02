@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { config } from './config';
-import { realUserApi, realMessageApi, realKnowledgeBaseApi } from './realApi';
+import { realUserApi, realMessageApi, realKnowledgeBaseApi, realPaperApi } from './realApi';
 import { User, Message, Conversation, Paper, KnowledgeBase } from './types';
 
 // 模拟用户数据
@@ -94,7 +94,7 @@ const knowledgeBases: KnowledgeBase[] = [
         id: 4,
         title: "Transformer架构深度解析",
         authors: ["李明", "王华"],
-        abstract: "本文深入剖析��Transformer架构的设计原理、各组件功能以及其在NLP领域的革命性影响...",
+        abstract: "本文深入剖析了Transformer架构的设计原理、各组件功能以及其在NLP领域的革命性影响...",
         publishDate: "2023-06-20",
         doi: "10.1234/transformer-analysis-2023",
         url: "https://example.com/paper4"
@@ -677,5 +677,120 @@ export const useUserByUsername = (username: string) => {
     queryKey: ['user', 'byUsername', username],
     queryFn: () => getUserByUsername(username),
     enabled: !!username
+  });
+};
+
+// 模拟搜索互联网论文
+export const searchPapers = async (query: string): Promise<Paper[]> => {
+  if (config.useMockData) {
+    // 模拟API延迟
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // 模拟基于查询的论文结果
+    const mockResults: Paper[] = [
+      {
+        id: 101,
+        title: `${query}相关研究进展`,
+        authors: ["张学者", "李研究"],
+        abstract: `本文综述了${query}领域的最新研究进展，包括关键技术、应用场景和未来发展方向...`,
+        publishDate: new Date().toISOString().split('T')[0],
+        doi: `10.1234/${query.replace(/\s+/g, '-').toLowerCase()}-2023`,
+        url: `https://example.com/papers/${query.replace(/\s+/g, '-').toLowerCase()}`
+      },
+      {
+        id: 102,
+        title: `${query}技术的创新应用`,
+        authors: ["王创新", "赵工程"],
+        abstract: `该研究提出了${query}的一种创新应用方法，显著提高了系统性能和用户体验...`,
+        publishDate: new Date().toISOString().split('T')[0],
+        doi: `10.5678/${query.replace(/\s+/g, '-').toLowerCase()}-application-2023`,
+        url: `https://example.com/papers/${query.replace(/\s+/g, '-').toLowerCase()}-application`
+      },
+      {
+        id: 103,
+        title: `${query}未来展望与挑战`,
+        authors: ["陈预测", "林分析"],
+        abstract: `本文分析了${query}领域面临的关键挑战，并对未来发展趋势进行了预测...`,
+        publishDate: new Date().toISOString().split('T')[0],
+        doi: `10.9012/${query.replace(/\s+/g, '-').toLowerCase()}-future-2023`,
+        url: `https://example.com/papers/${query.replace(/\s+/g, '-').toLowerCase()}-future`
+      }
+    ];
+    
+    return mockResults;
+  } else {
+    // 实际API调用
+    return realPaperApi.searchPapers(query);
+  }
+};
+
+// 创建知识库并添加论文
+export const createKnowledgeBaseWithPapers = async (title: string, description: string, papers: Paper[], tags: string[] = []): Promise<KnowledgeBase> => {
+  if (config.useMockData) {
+    // 模拟API延迟
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // 创建新知识库
+    const newKnowledgeBase: KnowledgeBase = {
+      id: Math.max(...knowledgeBases.map(kb => kb.id), 0) + 1,
+      title,
+      description,
+      userId: currentUser.id,
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
+      papers: papers.map((paper, index) => ({
+        ...paper,
+        id: 1000 + index
+      })),
+      tags,
+      stars: 0,
+      forks: 0
+    };
+    
+    // 添加到知识库列表
+    knowledgeBases.push(newKnowledgeBase);
+    
+    return newKnowledgeBase;
+  } else {
+    // 1. 创建知识库
+    const kb = await realKnowledgeBaseApi.addKnowledgeBase({
+      title,
+      description,
+      tags
+    });
+    
+    // 2. 添加论文到知识库
+    for (const paper of papers) {
+      await realKnowledgeBaseApi.addPaperToKnowledgeBase(kb.id, paper);
+    }
+    
+    // 3. 获取更新后的知识库
+    return await realKnowledgeBaseApi.getKnowledgeBase(kb.id);
+  }
+};
+
+export const useSearchPapers = (query: string) => {
+  return useQuery({
+    queryKey: ['papers', 'search', query],
+    queryFn: () => searchPapers(query),
+    enabled: !!query.trim(),
+    staleTime: 5 * 60 * 1000, // 5分钟
+  });
+};
+
+export const useCreateKnowledgeBase = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ title, description, papers, tags }: { 
+      title: string; 
+      description: string; 
+      papers: Paper[];
+      tags?: string[];
+    }) => createKnowledgeBaseWithPapers(title, description, papers, tags),
+    onSuccess: () => {
+      // 创建成功后，使知识库相关的查询失效，这样它们会重新获取最新数据
+      queryClient.invalidateQueries({ queryKey: ['userKnowledgeBases'] });
+      queryClient.invalidateQueries({ queryKey: ['knowledgeBases'] });
+    }
   });
 };

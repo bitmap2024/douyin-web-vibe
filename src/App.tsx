@@ -22,6 +22,8 @@ import Recommend from "./pages/Recommend";
 import Featured from "./pages/Featured";
 import Spark from "./pages/Spark";
 import Friends from "./pages/Friends";
+import Community from "./pages/Community";
+import CreatePost from "./pages/CreatePost";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +66,9 @@ const App = () => {
             <Route path="/knowledge-base/:kbId" element={<KnowledgeBaseDetail />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:userId" element={<MessageDetail />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/community/create" element={<CreatePost />} />
+            <Route path="/community/:postId" element={<Community />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

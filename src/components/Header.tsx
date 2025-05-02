@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 interface HeaderProps {
-  onLoginClick: () => void;
+  onLoginClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
+const Header: React.FC<HeaderProps> = ({ onLoginClick = () => {} }) => {
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-[#121212] z-50 flex items-center justify-between px-4 border-b border-gray-800">
       <div className="flex items-center space-x-2">

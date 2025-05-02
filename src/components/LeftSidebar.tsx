@@ -43,6 +43,7 @@ const LeftSidebar: React.FC = () => {
     if (path.includes("/trending")) return "trending";
     if (path.includes("/featured")) return "featured";
     if (path.includes("/spark")) return "spark";
+    if (path.includes("/community")) return "community";
     // 默认为推荐
     return "recommend";
   };
@@ -59,10 +60,10 @@ const LeftSidebar: React.FC = () => {
     { icon: "🔎", label: "精选", id: "featured" },
     { icon: "👍", label: "推荐", id: "recommend" },
     { icon: "📈", label: "趋势", id: "trending" },
-    { icon: "👤", label: "关注", id: "following" },
     { icon: "👥", label: "朋友", id: "friends" },
+    { icon: "👤", label: "关注", id: "following" },
+    { icon: "💬", label: "社区", id: "community" },
     { icon: "👤", label: "我的", id: "profile" },
-   
   ];
 
   const handleNavClick = (id: string) => {
@@ -90,6 +91,9 @@ const LeftSidebar: React.FC = () => {
         break;
       case "spark":
         navigate("/spark");
+        break;
+      case "community":
+        navigate("/community");
         break;
       // 其他导航项的处理可以在这里添加
       default:
