@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useKnowledgeBase, useUser } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,10 @@ import {
   FileText, 
   ExternalLink, 
   ChevronLeft,
-  Plus
+  Plus,
+  MessageCircle,
+  Send,
+  ArrowLeft
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
@@ -32,8 +35,35 @@ import EmailLoginForm from "@/components/EmailLoginForm";
 const KnowledgeBaseDetail: React.FC = () => {
   const { kbId } = useParams<{ kbId: string }>();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isAddPaperOpen, setIsAddPaperOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isAddIssueOpen, setIsAddIssueOpen] = useState(false);
+  const [issueView, setIssueView] = useState<"list" | "detail">("list");
+  const [currentIssue, setCurrentIssue] = useState<{
+    id: number;
+    title: string;
+    content: string;
+    status: string;
+    author: {
+      name: string;
+      avatar: string;
+    };
+    createdAt: string;
+    comments: Array<{
+      id: number;
+      content: string;
+      author: {
+        name: string;
+        avatar: string;
+      };
+      createdAt: string;
+    }>;
+  } | null>(null);
+  const [newIssue, setNewIssue] = useState({
+    title: "",
+    content: ""
+  });
   const [newPaper, setNewPaper] = useState({
     title: "",
     authors: "",
@@ -42,12 +72,133 @@ const KnowledgeBaseDetail: React.FC = () => {
     doi: "",
     url: ""
   });
+  const [newComment, setNewComment] = useState("");
   
   // 获取知识库数据
   const { data: kbData, isLoading: isKbLoading } = useKnowledgeBase(parseInt(kbId || "0"));
   
   // 获取知识库所有者数据
   const { data: ownerData } = useUser(kbData?.userId || 0);
+  
+  // 示例议题数据
+  const sampleIssues = [
+    {
+      id: 1,
+      title: "如何更好地理解这篇论文的方法部分？",
+      content: "我在理解论文的方法部分时遇到了一些困难，特别是关于他们使用的数学模型。论文中提到的公式(3)和公式(5)之间的联系不是很清楚，是否有人可以解释一下这两个公式的推导过程？另外，实验部分使用的参数设置似乎与理论分析不太一致，这是为什么？",
+      status: "进行中",
+      author: {
+        name: "JohnDoe",
+        avatar: "https://github.com/shadcn.png"
+      },
+      createdAt: "2023-05-15",
+      comments: [
+        {
+          id: 1,
+          content: "我也遇到了同样的问题，特别是公式(3)中的参数λ的选择依据不是很明确。",
+          author: {
+            name: "Alice",
+            avatar: ""
+          },
+          createdAt: "2023-05-16"
+        },
+        {
+          id: 2,
+          content: "关于公式(3)和(5)的联系，其实是通过泰勒展开推导的，论文的附录A中有详细的推导过程，但确实比较简略。我可以分享一下我的理解...",
+          author: {
+            name: "Professor",
+            avatar: ""
+          },
+          createdAt: "2023-05-17"
+        },
+        {
+          id: 3,
+          content: "实验部分的参数设置是基于作者的初步测试结果，他们在后续的消融实验中解释了不同参数设置的影响，可以参考论文的Figure 4。",
+          author: {
+            name: "Researcher",
+            avatar: ""
+          },
+          createdAt: "2023-05-18"
+        }
+      ]
+    },
+    {
+      id: 2,
+      title: "这篇论文的实验结果是否可复现？",
+      content: "我尝试复现这篇论文的实验结果，但是发现有些细节作者没有提供。特别是他们使用的数据预处理步骤，以及一些超参数的设置。有谁成功复现过这篇论文的结果吗？能否分享一下你们的经验？",
+      status: "已解决",
+      author: {
+        name: "WangLei",
+        avatar: ""
+      },
+      createdAt: "2023-05-10",
+      comments: [
+        {
+          id: 1,
+          content: "我成功复现了这篇论文的结果，关键是数据归一化的方法需要用z-score而不是min-max。",
+          author: {
+            name: "Reproducer",
+            avatar: ""
+          },
+          createdAt: "2023-05-11"
+        },
+        {
+          id: 2,
+          content: "我联系了论文作者，他们已经在GitHub上开源了完整代码：https://github.com/author/paper-code",
+          author: {
+            name: "Helper",
+            avatar: ""
+          },
+          createdAt: "2023-05-12"
+        },
+        {
+          id: 3,
+          content: "感谢分享！我使用作者提供的代码成功复现了结果，确实如前面所说，数据预处理是关键。",
+          author: {
+            name: "WangLei",
+            avatar: ""
+          },
+          createdAt: "2023-05-13"
+        },
+        {
+          id: 4,
+          content: "我也复现成功了，另外注意论文中Table 1的结果是运行5次的平均值，单次运行可能会有波动。",
+          author: {
+            name: "AnotherReproducer",
+            avatar: ""
+          },
+          createdAt: "2023-05-14"
+        },
+        {
+          id: 5,
+          content: "对了，还需要注意随机种子的设置，我用了作者代码中的种子才得到接近的结果。",
+          author: {
+            name: "DetailPerson",
+            avatar: ""
+          },
+          createdAt: "2023-05-15"
+        },
+        {
+          id: 6,
+          content: "我已经将完整的复现步骤整理成了一个文档，有需要的可以参考：https://myrepo.com/reproduction-guide",
+          author: {
+            name: "Organizer",
+            avatar: ""
+          },
+          createdAt: "2023-05-16"
+        },
+        {
+          id: 7,
+          content: "感谢大家的帮助，我已经成功复现了结果！",
+          author: {
+            name: "WangLei",
+            avatar: ""
+          },
+          createdAt: "2023-05-17"
+        }
+      ]
+    }
+  ];
   
   // 处理登录点击
   const handleLoginClick = () => {
@@ -64,10 +215,67 @@ const KnowledgeBaseDetail: React.FC = () => {
     });
   };
   
+  // 处理添加议题
+  const handleAddIssue = () => {
+    // 在实际应用中，这里应该调用API添加议题
+    setIsAddIssueOpen(false);
+    toast({
+      title: "添加成功",
+      description: "议题已添加到知识库",
+    });
+  };
+  
+  // 处理议题点击
+  const handleIssueClick = (issue: any) => {
+    setCurrentIssue(issue);
+    setIssueView("detail");
+  };
+  
+  // 返回议题列表
+  const handleBackToIssues = () => {
+    setIssueView("list");
+    setCurrentIssue(null);
+  };
+  
+  // 处理评论提交
+  const handleCommentSubmit = () => {
+    if (!newComment.trim()) return;
+    
+    // 在实际应用中，这里应该调用API提交评论
+    if (currentIssue) {
+      const updatedIssue = {
+        ...currentIssue,
+        comments: [
+          ...currentIssue.comments,
+          {
+            id: currentIssue.comments.length + 1,
+            content: newComment,
+            author: {
+              name: "当前用户",
+              avatar: "https://github.com/shadcn.png"
+            },
+            createdAt: new Date().toISOString().split('T')[0]
+          }
+        ]
+      };
+      setCurrentIssue(updatedIssue);
+      setNewComment("");
+      
+      toast({
+        title: "评论成功",
+        description: "你的回复已添加到议题中",
+      });
+    }
+  };
+  
   // 处理输入变化
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewPaper(prev => ({ ...prev, [name]: value }));
+    if (name === "title" || name === "content") {
+      setNewIssue(prev => ({ ...prev, [name]: value }));
+    } else {
+      setNewPaper(prev => ({ ...prev, [name]: value }));
+    }
   };
   
   if (isKbLoading || !kbData) {
@@ -138,6 +346,10 @@ const KnowledgeBaseDetail: React.FC = () => {
               <FileText className="h-4 w-4 mr-1" />
               论文 ({kbData.papers.length})
             </TabsTrigger>
+            <TabsTrigger value="issues" className="data-[state=active]:bg-gray-700 data-[state=active]:text-white">
+              <MessageCircle className="h-4 w-4 mr-1" />
+              议题
+            </TabsTrigger>
             <TabsTrigger value="about" className="data-[state=active]:bg-gray-700 data-[state=active]:text-white">
               关于
             </TabsTrigger>
@@ -187,6 +399,150 @@ const KnowledgeBaseDetail: React.FC = () => {
                 </div>
               ))}
             </div>
+          </TabsContent>
+          
+          <TabsContent value="issues" className="mt-4">
+            {issueView === "list" ? (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold text-white">议题讨论</h2>
+                  <Button 
+                    onClick={() => setIsAddIssueOpen(true)}
+                    className="bg-primary text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    创建议题
+                  </Button>
+                </div>
+                
+                <div className="space-y-4">
+                  {sampleIssues.map(issue => (
+                    <div 
+                      key={issue.id} 
+                      className="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors"
+                      onClick={() => handleIssueClick(issue)}
+                    >
+                      <div className="flex justify-between">
+                        <h3 className="text-lg font-medium text-white">{issue.title}</h3>
+                        <Badge variant="outline" className={
+                          issue.status === "进行中" 
+                            ? "bg-green-900/30 text-green-400 border-green-800"
+                            : "bg-blue-900/30 text-blue-400 border-blue-800"
+                        }>
+                          {issue.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center mt-2 text-sm text-gray-400">
+                        <Avatar className="h-5 w-5 mr-2">
+                          <AvatarImage src={issue.author.avatar} />
+                          <AvatarFallback>{issue.author.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <span>{issue.author.name}</span>
+                        <span className="mx-2">•</span>
+                        <span>创建于 {issue.createdAt}</span>
+                        <span className="mx-2">•</span>
+                        <span>{issue.comments.length}个回复</span>
+                      </div>
+                      <p className="text-gray-300 mt-2 line-clamp-2">
+                        {issue.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              currentIssue && (
+                <div className="space-y-6">
+                  {/* 返回按钮 */}
+                  <Button 
+                    variant="ghost" 
+                    className="text-gray-400 hover:text-white pl-0" 
+                    onClick={handleBackToIssues}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    返回议题列表
+                  </Button>
+                  
+                  {/* 议题标题和状态 */}
+                  <div className="flex justify-between items-start">
+                    <h2 className="text-2xl font-semibold text-white">{currentIssue.title}</h2>
+                    <Badge variant="outline" className={
+                      currentIssue.status === "进行中" 
+                        ? "bg-green-900/30 text-green-400 border-green-800"
+                        : "bg-blue-900/30 text-blue-400 border-blue-800"
+                    }>
+                      {currentIssue.status}
+                    </Badge>
+                  </div>
+                  
+                  {/* 作者信息 */}
+                  <div className="flex items-center text-sm text-gray-400">
+                    <Avatar className="h-5 w-5 mr-2">
+                      <AvatarImage src={currentIssue.author.avatar} />
+                      <AvatarFallback>{currentIssue.author.name.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <span>{currentIssue.author.name}</span>
+                    <span className="mx-2">•</span>
+                    <span>创建于 {currentIssue.createdAt}</span>
+                  </div>
+                  
+                  {/* 议题内容 */}
+                  <div className="bg-gray-800 p-6 rounded-lg">
+                    <p className="text-gray-300 whitespace-pre-line">{currentIssue.content}</p>
+                  </div>
+                  
+                  {/* 评论部分 */}
+                  <div className="space-y-4 mt-8">
+                    <h3 className="text-xl font-medium text-white">评论 ({currentIssue.comments.length})</h3>
+                    
+                    {/* 评论列表 */}
+                    {currentIssue.comments.map(comment => (
+                      <div key={comment.id} className="bg-gray-800 p-4 rounded-lg">
+                        <div className="flex items-center mb-3">
+                          <Avatar className="h-6 w-6 mr-2">
+                            <AvatarImage src={comment.author.avatar} />
+                            <AvatarFallback>{comment.author.name.charAt(0).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-white font-medium">{comment.author.name}</span>
+                          <span className="mx-2 text-gray-400">•</span>
+                          <span className="text-gray-400 text-sm">{comment.createdAt}</span>
+                        </div>
+                        <p className="text-gray-300">{comment.content}</p>
+                      </div>
+                    ))}
+                    
+                    {/* 添加评论 */}
+                    <div className="bg-gray-800 p-4 rounded-lg mt-6">
+                      <h4 className="text-lg font-medium text-white mb-3">添加回复</h4>
+                      <div className="flex items-start">
+                        <Avatar className="h-8 w-8 mr-3 mt-1">
+                          <AvatarImage src="https://github.com/shadcn.png" />
+                          <AvatarFallback>U</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-grow">
+                          <Textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="添加评论..."
+                            className="bg-[#2a2a2a] border-gray-700 w-full min-h-[100px]"
+                          />
+                          <div className="flex justify-end mt-3">
+                            <Button 
+                              onClick={handleCommentSubmit}
+                              className="bg-primary text-white"
+                              disabled={!newComment.trim()}
+                            >
+                              <Send className="h-4 w-4 mr-1" />
+                              发送回复
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
           </TabsContent>
           
           <TabsContent value="about" className="mt-4">
@@ -290,6 +646,48 @@ const KnowledgeBaseDetail: React.FC = () => {
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
         <DialogContent className="sm:max-w-md">
           <EmailLoginForm onClose={() => setIsLoginOpen(false)} />
+        </DialogContent>
+      </Dialog>
+      
+      {/* 添加议题对话框 */}
+      <Dialog open={isAddIssueOpen} onOpenChange={setIsAddIssueOpen}>
+        <DialogContent className="sm:max-w-md bg-[#1e1e1e] text-white">
+          <DialogHeader>
+            <DialogTitle>创建议题</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">标题</Label>
+              <Input
+                id="title"
+                name="title"
+                value={newIssue.title}
+                onChange={handleInputChange}
+                className="col-span-3 bg-[#2a2a2a] border-gray-700"
+                placeholder="议题标题"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="content" className="text-right pt-2">内容</Label>
+              <Textarea
+                id="content"
+                name="content"
+                value={newIssue.content}
+                onChange={handleInputChange}
+                className="col-span-3 bg-[#2a2a2a] border-gray-700"
+                rows={6}
+                placeholder="详细描述你的问题或讨论主题..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddIssueOpen(false)} className="border-gray-700 text-white">
+              取消
+            </Button>
+            <Button onClick={handleAddIssue} className="bg-primary text-white">
+              发布
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
