@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import LeftSidebar from "@/components/LeftSidebar";
@@ -33,6 +32,7 @@ import {
 } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import MessageButton from "@/components/MessageButton";
+import UserAvatar from "@/components/UserAvatar";
 
 interface UserProfileProps {
   isCurrentUser?: boolean;
@@ -176,7 +176,12 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
       <div className="ml-64 mt-16">
         {/* 顶部横向大卡片 */}
         <div className="relative bg-gradient-to-r from-[#232526] to-[#414345] h-56 flex items-end px-12 pb-6">
-          <img className="h-28 w-28 rounded-full border-4 border-white object-cover" src={userData.avatar} alt={userData.username} />
+          <UserAvatar 
+            username={userData.username}
+            avatarSrc={userData.avatar}
+            size="lg"
+            className="h-28 w-28 border-4 border-white" 
+          />
           <div className="ml-8 text-white">
             <div className="text-2xl font-bold">{userData.username}</div>
             <div className="mt-2 text-gray-300">抖音号：{userData.id}</div>

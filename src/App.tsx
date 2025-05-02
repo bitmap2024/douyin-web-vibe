@@ -21,6 +21,7 @@ import MessageDetail from "./pages/MessageDetail";
 import Recommend from "./pages/Recommend";
 import Featured from "./pages/Featured";
 import Spark from "./pages/Spark";
+import Friends from "./pages/Friends";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +54,7 @@ const App = () => {
             <Route path="/user/me" element={<UserProfile isCurrentUser={true} />} />
             <Route path="/user/:username" element={<UserProfile />} />
             <Route path="/following" element={<Following />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="/trending" element={<Trending />} />
             <Route path="/recommend" element={<Recommend />} />
             <Route path="/featured" element={<Featured />} />

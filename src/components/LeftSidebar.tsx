@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -31,8 +31,28 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick, count
 };
 
 const LeftSidebar: React.FC = () => {
-  const [activeTab, setActiveTab] = React.useState("recommend");
+  const location = useLocation();
   const navigate = useNavigate();
+
+  // 获取当前路径并确定活动标签
+  const getActiveTab = () => {
+    const path = location.pathname;
+    if (path.includes("/following")) return "following";
+    if (path.includes("/friends")) return "friends";
+    if (path.includes("/user/me")) return "profile";
+    if (path.includes("/trending")) return "trending";
+    if (path.includes("/featured")) return "featured";
+    if (path.includes("/spark")) return "spark";
+    // 默认为推荐
+    return "recommend";
+  };
+
+  const [activeTab, setActiveTab] = React.useState(getActiveTab());
+
+  // 当路由变化时更新activeTab
+  React.useEffect(() => {
+    setActiveTab(getActiveTab());
+  }, [location]);
 
   const NavItemsList = [
     { icon: "✨", label: "Spark", id: "spark" },
@@ -52,6 +72,9 @@ const LeftSidebar: React.FC = () => {
     switch (id) {
       case "following":
         navigate("/following");
+        break;
+      case "friends":
+        navigate("/friends");
         break;
       case "profile":
         navigate("/user/me");

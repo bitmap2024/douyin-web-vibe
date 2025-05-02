@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useCurrentUser, useMessages, useSendMessage, useMarkMessagesAsRead, users } from "@/lib/api";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
@@ -10,6 +9,7 @@ import { zhCN } from "date-fns/locale";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EmailLoginForm from "@/components/EmailLoginForm";
 import { Send } from "lucide-react";
+import UserAvatar from "@/components/UserAvatar";
 
 const MessageDetail: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -105,10 +105,11 @@ const MessageDetail: React.FC = () => {
               <path d="m15 18-6-6 6-6"/>
             </svg>
           </Button>
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={otherUser.avatar} alt={otherUser.username} />
-            <AvatarFallback>{otherUser.username.substring(0, 2)}</AvatarFallback>
-          </Avatar>
+          <UserAvatar 
+            username={otherUser.username}
+            avatarSrc={otherUser.avatar}
+            size="md"
+          />
           <h1 className="text-xl font-bold">{otherUser.username}</h1>
         </div>
         

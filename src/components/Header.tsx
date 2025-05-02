@@ -1,5 +1,5 @@
 import React from "react";
-import { Search } from "lucide-react";
+import { Search, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -35,6 +35,10 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-5">
           <Link to="/pricing" className="text-gray-300 text-sm hover:text-white cursor-pointer">定价</Link>
+          <a href="https://discord.gg/sparkhub" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white flex items-center space-x-1 cursor-pointer">
+            <MessageSquare className="h-5 w-5" />
+            <span className="text-sm">Discord</span>
+          </a>
         </div>
         <Button 
           onClick={onLoginClick}

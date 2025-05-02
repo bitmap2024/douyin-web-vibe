@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useCurrentUser, useConversations, users } from "@/lib/api";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EmailLoginForm from "@/components/EmailLoginForm";
+import UserAvatar from "@/components/UserAvatar";
 
 const Messages: React.FC = () => {
   const navigate = useNavigate();
@@ -79,10 +79,15 @@ const Messages: React.FC = () => {
                 onClick={() => navigate(`/messages/${otherUserId}`)}
               >
                 <CardContent className="p-4 flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={otherUser.avatar} alt={otherUser.username} />
-                    <AvatarFallback>{otherUser.username.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar 
+                    username={otherUser.username}
+                    avatarSrc={otherUser.avatar}
+                    size="md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/user/${otherUser.username}`);
+                    }}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
                       <h3 className="font-medium truncate">{otherUser.username}</h3>

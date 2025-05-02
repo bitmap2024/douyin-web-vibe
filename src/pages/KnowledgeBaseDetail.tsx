@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import EmailLoginForm from "@/components/EmailLoginForm";
+import UserAvatar from "@/components/UserAvatar";
 
 const KnowledgeBaseDetail: React.FC = () => {
   const { kbId } = useParams<{ kbId: string }>();
@@ -433,10 +434,12 @@ const KnowledgeBaseDetail: React.FC = () => {
                         </Badge>
                       </div>
                       <div className="flex items-center mt-2 text-sm text-gray-400">
-                        <Avatar className="h-5 w-5 mr-2">
-                          <AvatarImage src={issue.author.avatar} />
-                          <AvatarFallback>{issue.author.name.charAt(0).toUpperCase()}</AvatarFallback>
-                        </Avatar>
+                        <UserAvatar 
+                          username={issue.author.name}
+                          avatarSrc={issue.author.avatar}
+                          size="sm"
+                          className="h-5 w-5 mr-2"
+                        />
                         <span>{issue.author.name}</span>
                         <span className="mx-2">•</span>
                         <span>创建于 {issue.createdAt}</span>
@@ -477,10 +480,12 @@ const KnowledgeBaseDetail: React.FC = () => {
                   
                   {/* 作者信息 */}
                   <div className="flex items-center text-sm text-gray-400">
-                    <Avatar className="h-5 w-5 mr-2">
-                      <AvatarImage src={currentIssue.author.avatar} />
-                      <AvatarFallback>{currentIssue.author.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                    <UserAvatar 
+                      username={currentIssue.author.name}
+                      avatarSrc={currentIssue.author.avatar}
+                      size="sm"
+                      className="h-5 w-5 mr-2"
+                    />
                     <span>{currentIssue.author.name}</span>
                     <span className="mx-2">•</span>
                     <span>创建于 {currentIssue.createdAt}</span>
@@ -499,10 +504,12 @@ const KnowledgeBaseDetail: React.FC = () => {
                     {currentIssue.comments.map(comment => (
                       <div key={comment.id} className="bg-gray-800 p-4 rounded-lg">
                         <div className="flex items-center mb-3">
-                          <Avatar className="h-6 w-6 mr-2">
-                            <AvatarImage src={comment.author.avatar} />
-                            <AvatarFallback>{comment.author.name.charAt(0).toUpperCase()}</AvatarFallback>
-                          </Avatar>
+                          <UserAvatar 
+                            username={comment.author.name}
+                            avatarSrc={comment.author.avatar}
+                            size="sm"
+                            className="mr-2"
+                          />
                           <span className="text-white font-medium">{comment.author.name}</span>
                           <span className="mx-2 text-gray-400">•</span>
                           <span className="text-gray-400 text-sm">{comment.createdAt}</span>
@@ -515,10 +522,12 @@ const KnowledgeBaseDetail: React.FC = () => {
                     <div className="bg-gray-800 p-4 rounded-lg mt-6">
                       <h4 className="text-lg font-medium text-white mb-3">添加回复</h4>
                       <div className="flex items-start">
-                        <Avatar className="h-8 w-8 mr-3 mt-1">
-                          <AvatarImage src="https://github.com/shadcn.png" />
-                          <AvatarFallback>U</AvatarFallback>
-                        </Avatar>
+                        <UserAvatar 
+                          username="当前用户"
+                          avatarSrc="https://github.com/shadcn.png"
+                          size="sm"
+                          className="h-8 w-8 mr-3 mt-1"
+                        />
                         <div className="flex-grow">
                           <Textarea
                             value={newComment}

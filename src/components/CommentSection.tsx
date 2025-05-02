@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Heart } from "lucide-react";
+import UserAvatar from "@/components/UserAvatar";
 
 interface CommentProps {
   id: string;
@@ -114,10 +113,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div className="flex-1 overflow-y-auto h-[calc(80vh-130px)] px-4 py-2">
           {comments.map((comment) => (
             <div key={comment.id} className="flex py-3 border-b border-gray-100">
-              <Avatar className="h-10 w-10 mr-3">
-                <AvatarImage src={comment.avatar} />
-                <AvatarFallback>{comment.username[0]}</AvatarFallback>
-              </Avatar>
+              <UserAvatar 
+                username={comment.username}
+                avatarSrc={comment.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.username}`}
+                size="md"
+                className="h-10 w-10 mr-3"
+              />
               <div className="flex-1">
                 <p className="text-sm text-gray-500">{comment.username}</p>
                 <p className="text-sm py-1 text-black">{comment.content}</p>

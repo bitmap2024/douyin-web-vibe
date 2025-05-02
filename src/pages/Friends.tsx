@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EmailLoginForm from "@/components/EmailLoginForm";
 import KnowledgeBaseVideoFeed from "@/components/KnowledgeBaseVideoFeed";
 
-const Following: React.FC = () => {
+const Friends: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   
   const handleLoginClick = () => {
@@ -19,7 +19,7 @@ const Following: React.FC = () => {
       
       {/* 主体内容区域，右侧主区域布局 */}
       <div className="ml-64 mt-16">
-        <KnowledgeBaseVideoFeed sourceType="following" />
+        <KnowledgeBaseVideoFeed sourceType="friends" />
       </div>
       
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
@@ -31,4 +31,4 @@ const Following: React.FC = () => {
   );
 };
 
-export default Following; 
+export default Friends; 
