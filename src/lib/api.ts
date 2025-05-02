@@ -94,7 +94,7 @@ const knowledgeBases: KnowledgeBase[] = [
         id: 4,
         title: "Transformer架构深度解析",
         authors: ["李明", "王华"],
-        abstract: "本文深入剖析了Transformer架构的设计原理、各组件功能以及其在NLP领域的革命性影响...",
+        abstract: "本文深入剖析��Transformer架构的设计原理、各组件功能以及其在NLP领域的革命性影响...",
         publishDate: "2023-06-20",
         doi: "10.1234/transformer-analysis-2023",
         url: "https://example.com/paper4"
@@ -527,7 +527,8 @@ export const markMessagesAsRead = async (userId1: number, userId2: number): Prom
 export const useUser = (userId: number) => {
   return useQuery({
     queryKey: ['user', userId],
-    queryFn: () => getUser(userId)
+    queryFn: () => getUser(userId),
+    enabled: userId > 0
   });
 };
 
@@ -545,6 +546,7 @@ export const useFollowingList = () => {
   });
 };
 
+// Fix these hooks by removing direct mutation usage in components
 export const useFollowUser = () => {
   const queryClient = useQueryClient();
   
@@ -572,21 +574,24 @@ export const useUnfollowUser = () => {
 export const useUserKnowledgeBases = (userId: number) => {
   return useQuery({
     queryKey: ['userKnowledgeBases', userId],
-    queryFn: () => getUserKnowledgeBases(userId)
+    queryFn: () => getUserKnowledgeBases(userId),
+    enabled: userId !== undefined
   });
 };
 
 export const useUserKnowledgeBasesByUsername = (username: string) => {
   return useQuery({
     queryKey: ['userKnowledgeBasesByUsername', username],
-    queryFn: () => getUserKnowledgeBasesByUsername(username)
+    queryFn: () => getUserKnowledgeBasesByUsername(username),
+    enabled: !!username
   });
 };
 
 export const useKnowledgeBase = (kbId: number) => {
   return useQuery({
     queryKey: ['knowledgeBase', kbId],
-    queryFn: () => getKnowledgeBase(kbId)
+    queryFn: () => getKnowledgeBase(kbId),
+    enabled: kbId > 0
   });
 };
 
@@ -625,14 +630,16 @@ export const useAddPaperToKnowledgeBase = () => {
 export const useConversations = (userId: number) => {
   return useQuery({
     queryKey: ['conversations', userId],
-    queryFn: () => getConversations(userId)
+    queryFn: () => getConversations(userId),
+    enabled: userId > 0
   });
 };
 
 export const useMessages = (userId1: number, userId2: number) => {
   return useQuery({
     queryKey: ['messages', userId1, userId2],
-    queryFn: () => getMessages(userId1, userId2)
+    queryFn: () => getMessages(userId1, userId2),
+    enabled: userId1 > 0 && userId2 > 0
   });
 };
 
@@ -671,4 +678,4 @@ export const useUserByUsername = (username: string) => {
     queryFn: () => getUserByUsername(username),
     enabled: !!username
   });
-}; 
+};
