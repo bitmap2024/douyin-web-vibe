@@ -6,6 +6,7 @@ export interface User {
   followers: number;
   following: number;
   followingList?: number[];
+  likedKnowledgeBases?: number[]; // 用户喜欢的知识库ID
   location?: string;
   experience?: string;
 }

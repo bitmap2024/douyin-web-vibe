@@ -28,7 +28,8 @@ import {
   useUser,
   useUserKnowledgeBases, 
   useUserKnowledgeBasesByUsername,
-  isFollowing
+  isFollowing,
+  getAllKnowledgeBases
 } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import MessageButton from "@/components/MessageButton";
@@ -54,6 +55,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
     school: "北京大学",
     experience: "热爱生活，热爱分享，记录美好瞬间"
   });
+  const [likedKnowledgeBases, setLikedKnowledgeBases] = useState<any[]>([]);
+  const [isLikedContentLoading, setIsLikedContentLoading] = useState(true);
   
   // Get current user data
   const { data: currentUserData, isLoading: isCurrentUserLoading } = useCurrentUser();
@@ -99,6 +102,28 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
       checkFollowing();
     }
   }, [userData, isCurrentUser, currentUserData]);
+
+  useEffect(() => {
+    if (activeTab === "likes" && currentUserData && currentUserData.likedKnowledgeBases && Array.isArray(currentUserData.likedKnowledgeBases)) {
+      const fetchLikedContent = async () => {
+        try {
+          const allKnowledgeBases = await getAllKnowledgeBases();
+          
+          // 获取用户喜欢的知识库
+          const liked = allKnowledgeBases.filter(kb => 
+            currentUserData.likedKnowledgeBases.includes(kb.id)
+          );
+          setLikedKnowledgeBases(liked);
+          setIsLikedContentLoading(false);
+        } catch (error) {
+          console.error("获取喜欢的内容失败:", error);
+          setIsLikedContentLoading(false);
+        }
+      };
+      
+      fetchLikedContent();
+    }
+  }, [activeTab, currentUserData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -325,10 +350,55 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
                 </div>
               )
             ) : (
-              <div className="flex flex-col justify-center items-center h-64 text-gray-400">
-                <svg width="64" height="64" fill="none" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#232526"/><path d="M24 16v8m0 0v4m0-4h4m-4 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/></svg>
-                <p className="mt-4">暂无喜欢的内容</p>
-              </div>
+              isLikedContentLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <p>加载中...</p>
+                </div>
+              ) : likedKnowledgeBases.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {likedKnowledgeBases.map((kb) => (
+                    <Link 
+                      key={kb.id} 
+                      to={`/knowledge-base/${kb.id}`}
+                      className="group"
+                    >
+                      <div className="bg-[#1f1f1f] rounded-lg overflow-hidden transition transform hover:scale-[1.02] hover:shadow-xl">
+                        <div className="relative h-48 bg-gray-900">
+                          <img 
+                            src={`https://picsum.photos/seed/${kb.id}/500/300`} 
+                            alt={kb.title} 
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                            <h3 className="text-white font-medium truncate">{kb.title}</h3>
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex items-center mb-2">
+                            <UserAvatar 
+                              username={`用户${kb.userId}`} 
+                              avatarSrc={`https://api.dicebear.com/7.x/avataaars/svg?seed=${kb.userId}`}
+                              size="sm"
+                              className="w-6 h-6 mr-2" 
+                            />
+                            <span className="text-gray-400 text-sm">用户{kb.userId}</span>
+                          </div>
+                          <div className="text-gray-500 text-xs flex gap-2">
+                            <span>{kb.stars} 收藏</span>
+                            <span>•</span>
+                            <span>{kb.papers.length} 篇论文</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col justify-center items-center h-64 text-gray-400">
+                  <svg width="64" height="64" fill="none" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#232526"/><path d="M24 16v8m0 0v4m0-4h4m-4 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/></svg>
+                  <p className="mt-4">暂无喜欢的内容</p>
+                </div>
+              )
             )}
           </div>
         </div>

@@ -8,6 +8,13 @@ import { Paperclip, Import, Globe, ChevronUp, Search, Loader2 } from "lucide-rea
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser, useSearchPapers, useCreateKnowledgeBase } from "@/lib/api";
 import { Paper } from "@/lib/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 // 模拟项目类型
 interface ProjectType {
@@ -20,6 +27,7 @@ const Spark: React.FC = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchTrigger, setSearchTrigger] = useState("");
+  const [searchType, setSearchType] = useState("全网");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: currentUser } = useCurrentUser();
@@ -149,21 +157,21 @@ const Spark: React.FC = () => {
               
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
                 <div className="flex items-center space-x-4">
-                  <Button variant="outline" size="sm" className="flex items-center gap-2 rounded-lg border-gray-700 text-gray-300">
-                    <Paperclip size={16} />
-                    <span>附件</span>
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2 rounded-lg border-gray-700 text-gray-300">
-                    <Import size={16} />
-                    <span>导入数据</span>
-                  </Button>
+                  <Select
+                    value={searchType}
+                    onValueChange={setSearchType}
+                  >
+                    <SelectTrigger className="w-[120px] rounded-lg border-gray-700 text-gray-300 bg-transparent">
+                      <SelectValue placeholder="搜索范围" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1e1e1e] border-gray-700 text-gray-300">
+                      <SelectItem value="全网">全网</SelectItem>
+                      <SelectItem value="学术检索">学术检索</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-400">
-                    <Globe size={16} />
-                    <span>公开</span>
-                  </Button>
                   <Button 
                     variant="default" 
                     className="bg-gradient-to-r from-blue-600 to-pink-600 text-white rounded-lg px-6"

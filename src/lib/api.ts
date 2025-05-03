@@ -14,6 +14,16 @@ export const users = [
   { id: 101, username: "月下宅女", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=月下宅女", followers: 49000, following: 120, location: "成都", experience: "生活博主，分享美食与生活日常" },
   { id: 102, username: "travel_world", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=travel_world", followers: 30500, following: 210, location: "环球旅行中", experience: "旅行博主，足迹遍布全球，分享旅行经验与摄影技巧" },
   { id: 103, username: "drone_master", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=drone_master", followers: 78900, following: 150, location: "西安", experience: "航拍达人，专注分享无人机航拍技巧与视频" },
+  // 添加更多用户以生成更多内容
+  ...Array.from({ length: 30 }, (_, i) => ({
+    id: 200 + i,
+    username: `创作者${i + 1}`,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=creator${i + 1}`,
+    followers: Math.floor(Math.random() * 90000) + 10000,
+    following: Math.floor(Math.random() * 400) + 50,
+    location: ["北京", "上海", "广州", "深圳", "杭州", "成都", "重庆", "西安", "南京", "武汉"][Math.floor(Math.random() * 10)],
+    experience: ["科技博主，分享前沿科技", "AI研究员，专注技术创新", "知识分享者，传播学习方法", "算法工程师，热爱编程艺术", "数据科学家，挖掘数据价值", "教育工作者，分享教学经验"][Math.floor(Math.random() * 6)]
+  }))
 ];
 
 // 模拟当前登录用户
@@ -25,177 +35,313 @@ let currentUser = {
   following: 0,
   followingList: [] as number[],
   location: "北京",
-  experience: "热爱分享知识，构建个人知识库"
+  experience: "热爱分享知识，构建个人知识库",
+  likedKnowledgeBases: Array.from({ length: 40 }, (_, i) => i + 6) // 添加40个喜欢的知识库ID
 };
 
 // 模拟知识库数据
-const knowledgeBases: KnowledgeBase[] = [
-  {
-    id: 1,
-    title: "人工智能伦理研究",
-    description: "关于人工智能伦理问题的研究集合",
-    userId: 1,
-    createdAt: "2023-01-15",
-    updatedAt: "2023-04-20",
-    papers: [
-      {
-        id: 1,
-        title: "人工智能伦理框架",
-        authors: ["张三", "李四"],
-        abstract: "本文提出了一个评估人工智能系统伦理影响的框架...",
-        publishDate: "2022-12-10",
-        doi: "10.1234/ai-ethics-2022",
-        url: "https://example.com/paper1"
-      },
-      {
-        id: 2,
-        title: "AI决策透明度研究",
-        authors: ["王五", "赵六"],
-        abstract: "本研究探讨了提高人工智能决策透明度的多种方法...",
-        publishDate: "2023-01-05",
-        doi: "10.1234/ai-transparency-2023",
-        url: "https://example.com/paper2"
-      }
-    ],
-    tags: ["人工智能", "伦理", "透明度"],
-    stars: 42,
-    forks: 12
-  },
-  {
-    id: 2,
-    title: "机器学习算法优化",
-    description: "各种机器学习算法的优化技巧和最佳实践",
-    userId: 2,
-    createdAt: "2023-02-10",
-    updatedAt: "2023-04-18",
-    papers: [
-      {
-        id: 3,
-        title: "深度神经网络训练加速技术",
-        authors: ["陈七", "周八"],
-        abstract: "本文介绍了几种加速深度神经网络训练的技术...",
-        publishDate: "2023-02-15",
-        doi: "10.1234/dl-acceleration-2023",
-        url: "https://example.com/paper3"
-      }
-    ],
-    tags: ["机器学习", "深度学习", "优化"],
-    stars: 38,
-    forks: 8
-  },
-  // 为当前用户添加知识库
-  {
-    id: 3,
-    title: "大语言模型知识整合",
-    description: "大型语言模型（LLM）的综合研究，包含架构、训练方法、应用场景和最新成果",
-    userId: 0,
-    createdAt: "2023-05-12",
-    updatedAt: "2023-11-08",
-    papers: [
-      {
-        id: 4,
-        title: "Transformer架构深度解析",
-        authors: ["李明", "王华"],
-        abstract: "本文深入剖析了Transformer架构的设计原理、各组件功能以及其在NLP领域的革命性影响...",
-        publishDate: "2023-06-20",
-        doi: "10.1234/transformer-analysis-2023",
-        url: "https://example.com/paper4"
-      },
-      {
-        id: 5,
-        title: "大语言模型训练技术综述",
-        authors: ["张伟", "刘芳"],
-        abstract: "本文综述了大语言模型训练的关键技术，包括数据处理、预训练策略、指令微调等方法...",
-        publishDate: "2023-07-15",
-        doi: "10.1234/llm-training-survey-2023",
-        url: "https://example.com/paper5"
-      },
-      {
-        id: 6,
-        title: "大语言模型在医疗领域的应用",
-        authors: ["陈健", "林雪"],
-        abstract: "本研究探讨了大语言模型在医疗诊断、医学文献分析和临床决策支持等方面的应用前景和挑战...",
-        publishDate: "2023-08-22",
-        doi: "10.1234/llm-medical-applications-2023",
-        url: "https://example.com/paper6"
-      }
-    ],
-    tags: ["大语言模型", "NLP", "人工智能", "Transformer"],
-    stars: 156,
-    forks: 47
-  },
-  {
-    id: 4,
-    title: "计算机视觉研究集锦",
-    description: "计算机视觉领域的前沿研究和实践案例，包含目标检测、图像分割、视频分析等方向",
-    userId: 0,
-    createdAt: "2023-03-05",
-    updatedAt: "2023-10-30",
-    papers: [
-      {
-        id: 7,
-        title: "多模态目标检测最新进展",
-        authors: ["郑强", "赵明"],
-        abstract: "本文总结了结合多种传感器数据的目标检测技术的最新进展，特别是红外与可见光结合的方法...",
-        publishDate: "2023-04-10",
-        doi: "10.1234/multimodal-detection-2023",
-        url: "https://example.com/paper7"
-      },
-      {
-        id: 8,
-        title: "自监督学习在图像分割中的应用",
-        authors: ["黄磊", "吴佳"],
-        abstract: "研究了自监督学习方法如何改进图像分割任务的性能，并提出了一种新的预训练框架...",
-        publishDate: "2023-06-05",
-        doi: "10.1234/self-supervised-segmentation-2023",
-        url: "https://example.com/paper8"
-      }
-    ],
-    tags: ["计算机视觉", "目标检测", "图像分割", "深度学习"],
-    stars: 87,
-    forks: 23
-  },
-  {
-    id: 5,
-    title: "强化学习理论与实践",
-    description: "强化学习算法的理论基础、最新研究方向和实际应用案例的综合集合",
-    userId: 0,
-    createdAt: "2023-04-18",
-    updatedAt: "2023-12-01",
-    papers: [
-      {
-        id: 9,
-        title: "多智能体强化学习最新进展",
-        authors: ["孙伟", "李强"],
-        abstract: "本文综述了多智能体强化学习的研究现状，包括合作与竞争环境下的算法设计和应用场景...",
-        publishDate: "2023-05-20",
-        doi: "10.1234/marl-advances-2023",
-        url: "https://example.com/paper9"
-      },
-      {
-        id: 10,
-        title: "基于模型的强化学习方法对比",
-        authors: ["王磊", "张红"],
-        abstract: "对比分析了不同基于模型的强化学习方法在效率、稳定性和泛化能力方面的表现...",
-        publishDate: "2023-07-12",
-        doi: "10.1234/model-based-rl-comparison-2023",
-        url: "https://example.com/paper10"
-      },
-      {
-        id: 11,
-        title: "强化学习在自动驾驶中的应用",
-        authors: ["刘明", "陈亮"],
-        abstract: "探讨了强化学习技术在自动驾驶决策控制、路径规划和场景理解等方面的应用研究...",
-        publishDate: "2023-09-08",
-        doi: "10.1234/rl-autonomous-driving-2023",
-        url: "https://example.com/paper11"
-      }
-    ],
-    tags: ["强化学习", "人工智能", "多智能体系统", "自动驾驶"],
-    stars: 112,
-    forks: 34
-  }
-];
+// 生成更多的知识库模拟数据
+const generateKnowledgeBases = () => {
+  const baseKnowledgeBases = [
+    {
+      id: 1,
+      title: "人工智能伦理研究",
+      description: "关于人工智能伦理问题的研究集合",
+      userId: 1,
+      createdAt: "2023-01-15",
+      updatedAt: "2023-04-20",
+      papers: [
+        {
+          id: 1,
+          title: "人工智能伦理框架",
+          authors: ["张三", "李四"],
+          abstract: "本文提出了一个评估人工智能系统伦理影响的框架...",
+          publishDate: "2022-12-10",
+          doi: "10.1234/ai-ethics-2022",
+          url: "https://example.com/paper1"
+        },
+        {
+          id: 2,
+          title: "AI决策透明度研究",
+          authors: ["王五", "赵六"],
+          abstract: "本研究探讨了提高人工智能决策透明度的多种方法...",
+          publishDate: "2023-01-05",
+          doi: "10.1234/ai-transparency-2023",
+          url: "https://example.com/paper2"
+        }
+      ],
+      tags: ["人工智能", "伦理", "透明度"],
+      stars: 42,
+      forks: 12
+    },
+    {
+      id: 2,
+      title: "机器学习算法优化",
+      description: "各种机器学习算法的优化技巧和最佳实践",
+      userId: 2,
+      createdAt: "2023-02-10",
+      updatedAt: "2023-04-18",
+      papers: [
+        {
+          id: 3,
+          title: "深度神经网络训练加速技术",
+          authors: ["陈七", "周八"],
+          abstract: "本文介绍了几种加速深度神经网络训练的技术...",
+          publishDate: "2023-02-15",
+          doi: "10.1234/dl-acceleration-2023",
+          url: "https://example.com/paper3"
+        }
+      ],
+      tags: ["机器学习", "深度学习", "优化"],
+      stars: 38,
+      forks: 8
+    },
+    // 为当前用户添加知识库
+    {
+      id: 3,
+      title: "大语言模型知识整合",
+      description: "大型语言模型（LLM）的综合研究，包含架构、训练方法、应用场景和最新成果",
+      userId: 0,
+      createdAt: "2023-05-12",
+      updatedAt: "2023-11-08",
+      papers: [
+        {
+          id: 4,
+          title: "Transformer架构深度解析",
+          authors: ["李明", "王华"],
+          abstract: "本文深入剖析了Transformer架构的设计原理、各组件功能以及其在NLP领域的革命性影响...",
+          publishDate: "2023-06-20",
+          doi: "10.1234/transformer-analysis-2023",
+          url: "https://example.com/paper4"
+        },
+        {
+          id: 5,
+          title: "大语言模型训练技术综述",
+          authors: ["张伟", "刘芳"],
+          abstract: "本文综述了大语言模型训练的关键技术，包括数据处理、预训练策略、指令微调等方法...",
+          publishDate: "2023-07-15",
+          doi: "10.1234/llm-training-survey-2023",
+          url: "https://example.com/paper5"
+        },
+        {
+          id: 6,
+          title: "大语言模型在医疗领域的应用",
+          authors: ["陈健", "林雪"],
+          abstract: "本研究探讨了大语言模型在医疗诊断、医学文献分析和临床决策支持等方面的应用前景和挑战...",
+          publishDate: "2023-08-22",
+          doi: "10.1234/llm-medical-applications-2023",
+          url: "https://example.com/paper6"
+        }
+      ],
+      tags: ["大语言模型", "NLP", "人工智能", "Transformer"],
+      stars: 156,
+      forks: 47
+    },
+    {
+      id: 4,
+      title: "计算机视觉研究集锦",
+      description: "计算机视觉领域的前沿研究和实践案例，包含目标检测、图像分割、视频分析等方向",
+      userId: 0,
+      createdAt: "2023-03-05",
+      updatedAt: "2023-10-30",
+      papers: [
+        {
+          id: 7,
+          title: "多模态目标检测最新进展",
+          authors: ["郑强", "赵明"],
+          abstract: "本文总结了结合多种传感器数据的目标检测技术的最新进展，特别是红外与可见光结合的方法...",
+          publishDate: "2023-04-10",
+          doi: "10.1234/multimodal-detection-2023",
+          url: "https://example.com/paper7"
+        },
+        {
+          id: 8,
+          title: "自监督学习在图像分割中的应用",
+          authors: ["黄磊", "吴佳"],
+          abstract: "研究了自监督学习方法如何改进图像分割任务的性能，并提出了一种新的预训练框架...",
+          publishDate: "2023-06-05",
+          doi: "10.1234/self-supervised-segmentation-2023",
+          url: "https://example.com/paper8"
+        }
+      ],
+      tags: ["计算机视觉", "目标检测", "图像分割", "深度学习"],
+      stars: 87,
+      forks: 23
+    },
+    {
+      id: 5,
+      title: "强化学习理论与实践",
+      description: "强化学习算法的理论基础、最新研究方向和实际应用案例的综合集合",
+      userId: 0,
+      createdAt: "2023-04-18",
+      updatedAt: "2023-12-01",
+      papers: [
+        {
+          id: 9,
+          title: "多智能体强化学习最新进展",
+          authors: ["孙伟", "李强"],
+          abstract: "本文综述了多智能体强化学习的研究现状，包括合作与竞争环境下的算法设计和应用场景...",
+          publishDate: "2023-05-20",
+          doi: "10.1234/marl-advances-2023",
+          url: "https://example.com/paper9"
+        },
+        {
+          id: 10,
+          title: "基于模型的强化学习方法对比",
+          authors: ["王磊", "张红"],
+          abstract: "对比分析了不同基于模型的强化学习方法在效率、稳定性和泛化能力方面的表现...",
+          publishDate: "2023-07-12",
+          doi: "10.1234/model-based-rl-comparison-2023",
+          url: "https://example.com/paper10"
+        },
+        {
+          id: 11,
+          title: "强化学习在自动驾驶中的应用",
+          authors: ["刘明", "陈亮"],
+          abstract: "探讨了强化学习技术在自动驾驶决策控制、路径规划和场景理解等方面的应用研究...",
+          publishDate: "2023-09-08",
+          doi: "10.1234/rl-autonomous-driving-2023",
+          url: "https://example.com/paper11"
+        }
+      ],
+      tags: ["强化学习", "人工智能", "多智能体系统", "自动驾驶"],
+      stars: 112,
+      forks: 34
+    }
+  ];
+
+  const titles = [
+    "深度学习算法实践", "自然语言处理最新研究", "计算机视觉前沿技术", "推荐系统设计与优化",
+    "区块链技术与应用", "数据挖掘方法论", "机器人学研究进展", "量子计算理论基础",
+    "神经网络结构设计", "边缘计算技术实践", "联邦学习研究综述", "图神经网络应用案例",
+    "增强现实技术研究", "虚拟现实发展趋势", "无人驾驶技术探索", "智能物联网解决方案",
+    "情感计算研究进展", "医疗AI应用案例", "金融科技研究前沿", "教育科技创新应用",
+    "游戏AI设计与实现", "可解释AI研究方法", "算法公平性探讨", "隐私计算技术",
+    "移动计算技术发展", "云计算架构设计", "社交网络分析方法", "认知计算研究",
+    "生物信息学算法", "智能城市解决方案", "智能农业技术应用", "音频信号处理",
+    "视频分析技术研究", "知识图谱构建方法", "自动化测试技术", "网络安全研究",
+    "分布式系统设计", "高性能计算技术", "绿色计算方案", "数字孪生技术",
+    "元宇宙研究与探索", "智能制造关键技术", "大数据处理框架", "时间序列分析",
+    "异常检测算法", "多模态学习方法", "语音识别技术", "图像生成模型",
+    "对抗学习研究", "自动编码器应用", "强化学习案例", "迁移学习技术"
+  ];
+  
+  const descriptions = [
+    "探索人工智能前沿技术的应用与实践研究", "收集整理该领域最新研究成果与技术路线",
+    "深入分析该技术的理论基础与实践案例", "汇总该方向的经典论文与创新方法",
+    "系统梳理该领域的发展历程与未来趋势", "聚焦该技术在不同场景下的应用效果",
+    "研究该算法的优化方法与性能提升技术", "分析该领域的挑战与突破性进展",
+    "探讨该技术与其他领域的交叉融合研究", "总结该方向的最佳实践与经验教训",
+    "整理该研究方向的原理解析与实验验证", "收集该技术在不同行业的应用案例"
+  ];
+  
+  const tagSets = [
+    ["人工智能", "深度学习", "算法优化"],
+    ["自然语言处理", "文本分析", "语义理解"],
+    ["计算机视觉", "图像识别", "目标检测"],
+    ["机器学习", "特征工程", "模型评估"],
+    ["推荐系统", "个性化", "用户画像"],
+    ["数据科学", "大数据", "数据挖掘"],
+    ["神经网络", "反向传播", "激活函数"],
+    ["强化学习", "策略优化", "奖励机制"],
+    ["迁移学习", "领域适应", "知识迁移"],
+    ["无监督学习", "聚类算法", "降维技术"],
+    ["图神经网络", "图表示学习", "节点分类"],
+    ["联邦学习", "隐私保护", "分布式训练"],
+    ["量子计算", "量子算法", "量子优势"],
+    ["边缘计算", "实时处理", "分布式系统"],
+    ["区块链", "智能合约", "分布式账本"],
+    ["物联网", "传感器网络", "智能设备"]
+  ];
+
+  // 为每个用户生成专属知识库
+  const userKnowledgeBases = users.filter(user => user.id >= 200).map((user, index) => {
+    const userKbCount = Math.floor(Math.random() * 3) + 1; // 每个用户1-3个知识库
+    
+    return Array.from({ length: userKbCount }, (_, i) => {
+      const kbId = baseKnowledgeBases.length + index * 3 + i + 1;
+      const titleIndex = Math.floor(Math.random() * titles.length);
+      const descIndex = Math.floor(Math.random() * descriptions.length);
+      const tagSetIndex = Math.floor(Math.random() * tagSets.length);
+      
+      return {
+        id: kbId,
+        title: titles[titleIndex],
+        description: descriptions[descIndex],
+        userId: user.id,
+        createdAt: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+        updatedAt: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+        papers: [
+          {
+            id: kbId * 10 + 1,
+            title: `${titles[titleIndex]}的理论基础`,
+            authors: [`作者${kbId * 2 - 1}`, `作者${kbId * 2}`],
+            abstract: `本文探讨了${titles[titleIndex]}的理论基础和核心概念，分析了其在实际应用中的关键技术和方法...`,
+            publishDate: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+            doi: `10.${1234 + kbId}/paper-${kbId}-1`,
+            url: `https://example.com/paper-${kbId}-1`
+          },
+          {
+            id: kbId * 10 + 2,
+            title: `${titles[titleIndex]}的应用案例研究`,
+            authors: [`作者${kbId * 2 + 1}`, `作者${kbId * 2 + 2}`],
+            abstract: `本研究总结了${titles[titleIndex]}在多个领域的应用案例，并分析了其实施过程中的经验和教训...`,
+            publishDate: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+            doi: `10.${1234 + kbId}/paper-${kbId}-2`,
+            url: `https://example.com/paper-${kbId}-2`
+          }
+        ],
+        tags: tagSets[tagSetIndex],
+        stars: Math.floor(Math.random() * 200) + 10,
+        forks: Math.floor(Math.random() * 50) + 5
+      };
+    });
+  }).flat();
+
+  // 为当前用户添加至少20个知识库
+  const currentUserKnowledgeBases = Array.from({ length: 20 }, (_, i) => {
+    const kbId = baseKnowledgeBases.length + userKnowledgeBases.length + i + 1;
+    const titleIndex = Math.floor(Math.random() * titles.length);
+    const descIndex = Math.floor(Math.random() * descriptions.length);
+    const tagSetIndex = Math.floor(Math.random() * tagSets.length);
+    
+    return {
+      id: kbId,
+      title: titles[titleIndex],
+      description: descriptions[descIndex],
+      userId: 0, // 当前用户
+      createdAt: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+      updatedAt: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+      papers: [
+        {
+          id: kbId * 10 + 1,
+          title: `${titles[titleIndex]}的最新进展`,
+          authors: [`研究者A`, `研究者B`],
+          abstract: `本文综述了${titles[titleIndex]}领域的最新进展，分析了目前面临的主要挑战和未来的发展方向...`,
+          publishDate: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+          doi: `10.${1234 + kbId}/paper-${kbId}-1`,
+          url: `https://example.com/paper-${kbId}-1`
+        },
+        {
+          id: kbId * 10 + 2,
+          title: `${titles[titleIndex]}的实验分析`,
+          authors: [`研究者C`, `研究者D`],
+          abstract: `本研究通过一系列实验，对${titles[titleIndex]}的性能和效果进行了详细分析和评估...`,
+          publishDate: `2023-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+          doi: `10.${1234 + kbId}/paper-${kbId}-2`,
+          url: `https://example.com/paper-${kbId}-2`
+        }
+      ],
+      tags: tagSets[tagSetIndex],
+      stars: Math.floor(Math.random() * 200) + 30,
+      forks: Math.floor(Math.random() * 50) + 10
+    };
+  });
+
+  return [...baseKnowledgeBases, ...userKnowledgeBases, ...currentUserKnowledgeBases];
+};
+
+const knowledgeBases = generateKnowledgeBases();
 
 // 模拟私信数据
 const messages: Message[] = [
@@ -341,7 +487,7 @@ export const unfollowUser = async (userId: number): Promise<boolean> => {
   }
 };
 
-// 检���是否已关注
+// 检查是否已关注
 export const isFollowing = async (userId: number) => {
   if (config.useMockData) {
     return currentUser.followingList.includes(userId);

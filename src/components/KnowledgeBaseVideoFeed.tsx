@@ -29,15 +29,60 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
   const navigate = useNavigate();
   const [filteredKnowledgeBases, setFilteredKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [owners, setOwners] = useState<Record<number, any>>({});
+  const [isDataGenerated, setIsDataGenerated] = useState(false);
   
-  // 模拟视频数据
+  // 添加更多视频内容
   const videoContents = [
     "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YWklMjBicmFpbnxlbnwwfHwwfHx8MA%3D%3D",
     "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YWklMjBicmFpbnxlbnwwfHwwfHx8MA%3D%3D",
     "https://images.unsplash.com/photo-1620330989164-870d89a04dd0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8YWklMjBicmFpbnxlbnwwfHwwfHx8MA%3D%3D",
     "https://images.unsplash.com/photo-1562408590-e32931084e23?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fHJvYm90fGVufDB8fDB8fHww",
-    "https://images.unsplash.com/photo-1589254065878-42c9da997008?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cm9ib3R8ZW58MHx8MHx8fDA%3D"
+    "https://images.unsplash.com/photo-1589254065878-42c9da997008?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cm9ib3R8ZW58MHx8MHx8fDA%3D",
+    // 添加更多图片
+    "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1535378620166-273708d44e4c?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1591696205602-2f950c417cb9?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1677442135137-3743cad5025d?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1675514576762-bc0f50221607?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    "https://images.unsplash.com/photo-1633412802994-5c058f151b66?auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
   ];
+
+  // 创建一个函数来生成大量知识库数据
+  const generateKnowledgeBases = (originalData: KnowledgeBase[], minCount: number): KnowledgeBase[] => {
+    if (!originalData || originalData.length === 0) return [];
+    
+    if (originalData.length >= minCount) {
+      return originalData;
+    }
+    
+    console.log(`生成数据，原有数量: ${originalData.length}，目标数量: ${minCount}`);
+    
+    // 复制现有数据并修改以创建更多条目
+    const extraNeeded = minCount - originalData.length;
+    let result = [...originalData];
+    
+    for (let i = 0; i < extraNeeded; i++) {
+      const original = originalData[i % originalData.length];
+      const newKB: KnowledgeBase = {
+        ...original,
+        id: original.id + 10000 + i, // 创建新的唯一ID
+        title: `${original.title} - 变体 ${i + 1}`, // 修改标题
+        stars: Math.floor(original.stars * (0.5 + Math.random())), // 随机修改星数
+        description: `${original.description} (${i + 1})`, // 修改描述
+        createdAt: new Date(new Date(original.createdAt).getTime() + i * 86400000).toISOString().split('T')[0], // 每个项目日期+1天
+        updatedAt: new Date(new Date(original.updatedAt).getTime() + i * 86400000).toISOString().split('T')[0]
+      };
+      result.push(newKB);
+    }
+    
+    console.log(`生成完成，新数据量: ${result.length}`);
+    return result;
+  };
 
   // 根据sourceType过滤知识库
   useEffect(() => {
@@ -50,16 +95,18 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
       filtered = [...knowledgeBases].sort((a, b) => b.stars - a.stars);
     } else if (sourceType === "following") {
       // 关注：只显示用户关注的创作者创建的知识库
-      // 这里使用followingList来模拟用户关注的创作者
-      if (currentUser.followingList) {
+      if (currentUser.followingList && currentUser.followingList.length > 0) {
         filtered = knowledgeBases.filter(kb => 
           currentUser.followingList?.includes(kb.userId)
         );
+      } else {
+        // 如果没有关注任何人，默认显示一些知识库
+        filtered = [...knowledgeBases].sort(() => Math.random() - 0.5).slice(0, 10);
       }
     } else if (sourceType === "friends") {
       // 朋友：相互关注的用户创建的知识库
       // 假设朋友是双向关注的关系
-      if (currentUser.followingList) {
+      if (currentUser.followingList && currentUser.followingList.length > 0) {
         filtered = knowledgeBases.filter(kb => {
           // 获取知识库创建者
           const creator = { id: kb.userId, followingList: [] };
@@ -67,6 +114,14 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
           return currentUser.followingList?.includes(kb.userId) && 
                  creator.followingList.includes(currentUser.id);
         });
+        
+        // 如果没有朋友关系，默认显示一些知识库
+        if (filtered.length === 0) {
+          filtered = [...knowledgeBases].sort(() => Math.random() - 0.5).slice(0, 10);
+        }
+      } else {
+        // 默认显示一些随机知识库
+        filtered = [...knowledgeBases].sort(() => Math.random() - 0.5).slice(0, 10);
       }
     }
 
@@ -74,18 +129,37 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
     if (filtered.length === 0) {
       filtered = [...knowledgeBases].sort((a, b) => b.stars - a.stars);
     }
-
-    setFilteredKnowledgeBases(filtered);
+    
+    // 确保有足够多的数据
+    const minItemCount = sourceType === "recommend" ? 120 : 30;
+    const generatedData = generateKnowledgeBases(filtered, minItemCount);
+    
+    // 随机打乱顺序，使体验更加真实
+    if (sourceType === "recommend") {
+      generatedData.sort((a, b) => b.stars - a.stars);
+    } else {
+      generatedData.sort(() => Math.random() - 0.5);
+    }
+    
+    setFilteredKnowledgeBases(generatedData);
+    setIsDataGenerated(true);
     
     // 获取所有知识库创建者的信息
     const fetchOwners = async () => {
       const ownersMap: Record<number, any> = {};
-      for (const kb of filtered) {
+      // 只获取前20个知识库的创建者信息，避免过多API调用
+      const kbsToFetch = generatedData.slice(0, 20);
+      for (const kb of kbsToFetch) {
         try {
           const user = await getUserByUsername(`用户${kb.userId}`);
           ownersMap[kb.userId] = user;
         } catch (error) {
           console.error(`获取用户信息失败: ${kb.userId}`, error);
+          // 创建默认用户信息
+          ownersMap[kb.userId] = { 
+            username: `用户${kb.userId}`, 
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${kb.userId}` 
+          };
         }
       }
       setOwners(ownersMap);
