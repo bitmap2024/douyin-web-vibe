@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog, 
@@ -18,10 +18,26 @@ interface Message {
   timestamp: Date;
 }
 
+interface Position {
+  x: number;
+  y: number;
+}
+
 const AIAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const [wasDragged, setWasDragged] = useState(false);
+  const [position, setPosition] = useState<Position>(() => {
+    // 从localStorage获取保存的位置，如果没有则使用默认位置
+    const savedPosition = localStorage.getItem('aiAssistantPosition');
+    return savedPosition 
+      ? JSON.parse(savedPosition) 
+      : { x: window.innerWidth - 80, y: window.innerHeight - 80 };
+  });
+  const dragRef = useRef<HTMLDivElement>(null);
+  const initialMousePosRef = useRef<Position>({ x: 0, y: 0 });
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -77,13 +93,82 @@ const AIAssistant: React.FC = () => {
     }
   };
 
+  // 处理拖动开始
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isOpen) return; // 如果对话框已打开，不允许拖动
+    
+    // 记录鼠标初始位置
+    initialMousePosRef.current = { x: e.clientX, y: e.clientY };
+    setIsDragging(true);
+    setWasDragged(false);
+  };
+
+  const handleClick = () => {
+    // 只有在没有拖动的情况下才打开聊天窗口
+    if (!wasDragged && !isDragging) {
+      setIsOpen(true);
+    }
+  };
+
+  // 处理拖动过程
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      
+      // 计算移动距离
+      const dx = Math.abs(e.clientX - initialMousePosRef.current.x);
+      const dy = Math.abs(e.clientY - initialMousePosRef.current.y);
+      
+      // 如果移动超过5像素，认为是拖拽而非点击
+      if (dx > 5 || dy > 5) {
+        setWasDragged(true);
+      }
+      
+      // 更新位置，确保不超出屏幕边界
+      const newX = Math.max(0, Math.min(e.clientX, window.innerWidth - 80));
+      const newY = Math.max(0, Math.min(e.clientY, window.innerHeight - 80));
+      
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        // 保存位置到localStorage
+        localStorage.setItem('aiAssistantPosition', JSON.stringify(position));
+        
+        // 延迟重置wasDragged标志，确保点击事件处理正确
+        setTimeout(() => {
+          setWasDragged(false);
+        }, 100);
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, position]);
+
   return (
     <>
-      {/* 悬浮按钮 */}
+      {/* 可拖动的悬浮按钮 */}
       {!isOpen && (
         <div 
-          className="fixed bottom-6 right-6 z-50 cursor-pointer"
-          onClick={() => setIsOpen(true)}
+          ref={dragRef}
+          className={`fixed z-50 cursor-${isDragging ? 'grabbing' : 'grab'}`}
+          style={{ 
+            left: `${position.x}px`, 
+            top: `${position.y}px`,
+            transition: isDragging ? 'none' : 'all 0.2s ease'
+          }}
+          onClick={handleClick}
+          onMouseDown={handleMouseDown}
         >
           <div className="relative">
             <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">

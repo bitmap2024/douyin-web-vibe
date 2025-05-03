@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageSquare, Share, Bookmark } from "lucide-react";
@@ -30,6 +30,10 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
   const [filteredKnowledgeBases, setFilteredKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const [owners, setOwners] = useState<Record<number, any>>({});
   const [isDataGenerated, setIsDataGenerated] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<'up' | 'down'>('down');
+  const [isPlaying, setIsPlaying] = useState(true);
+  const videoRef = useRef<HTMLDivElement>(null);
   
   // 添加更多视频内容
   const videoContents = [
@@ -170,13 +174,27 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
   
   const handleNext = () => {
     if (filteredKnowledgeBases && currentIndex < filteredKnowledgeBases.length - 1) {
-      setCurrentIndex(prevIndex => prevIndex + 1);
+      setTransitionDirection('down');
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex(prevIndex => prevIndex + 1);
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 50);
+      }, 200);
     }
   };
   
   const handlePrevious = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(prevIndex => prevIndex - 1);
+      setTransitionDirection('up');
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentIndex(prevIndex => prevIndex - 1);
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 50);
+      }, 200);
     }
   };
   
@@ -184,19 +202,52 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
     navigate(`/knowledge-base/${kbId}`);
   };
   
-  // 键盘导航
+  // 键盘导航 - 修改空格键为播放/暂停
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
         handlePrevious();
       } else if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+        // 只使用方向键切换视频
         handleNext();
+      } else if (event.key === ' ') {
+        // 空格键控制播放/暂停
+        setIsPlaying(prevState => !prevState);
+        event.preventDefault(); // 防止空格键滚动页面
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentIndex, filteredKnowledgeBases]); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  // 添加鼠标滚轮事件
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      // 检测滚轮方向
+      if (event.deltaY > 0) {
+        // 向下滚动
+        handleNext();
+      } else if (event.deltaY < 0) {
+        // 向上滚动
+        handlePrevious();
+      }
+      // 防止默认滚动行为
+      event.preventDefault();
+    };
+    
+    // 只有在视频区域内滚动时才触发
+    const videoElement = videoRef.current;
+    if (videoElement) {
+      videoElement.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener('wheel', handleWheel);
+      }
     };
   }, [currentIndex, filteredKnowledgeBases]); // eslint-disable-line react-hooks/exhaustive-deps
   
@@ -217,14 +268,31 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
   
   return (
     <div className="h-[calc(100vh-4rem)] bg-black flex items-center">
-      <div className="relative h-full w-full">
+      <div className="relative h-full w-full" ref={videoRef}>
         {/* 视频区域 */}
-        <div className="relative h-full w-full bg-gray-900 overflow-hidden">
+        <div className={`relative h-full w-full bg-gray-900 overflow-hidden transition-all duration-300 ${
+          isTransitioning 
+            ? transitionDirection === 'down' 
+              ? 'opacity-0 transform translate-y-10' 
+              : 'opacity-0 transform -translate-y-10' 
+            : 'opacity-100 transform translate-y-0'
+        }`}>
           <img 
             src={videoSrc} 
             alt={currentKB.title}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${!isPlaying ? 'filter brightness-75' : ''}`}
           />
+          
+          {/* 播放/暂停指示器 */}
+          {!isPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-gray-800/70 rounded-full p-6">
+                <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+            </div>
+          )}
           
           {/* 视频控制按钮区域 */}
           <div className="absolute inset-0 flex">
@@ -258,7 +326,11 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
           </div>
           
           {/* 知识库信息区域 */}
-          <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black to-transparent">
+          <div className={`absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black to-transparent transition-all duration-300 ${
+            isTransitioning 
+              ? 'opacity-0 transform translate-y-8' 
+              : 'opacity-100 transform translate-y-0'
+          }`}>
             <div className="max-w-4xl mb-4">
               <h3 
                 className="text-white text-3xl font-bold mb-4 cursor-pointer"
@@ -295,7 +367,11 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
           </div>
           
           {/* 右侧操作按钮 */}
-          <div className="absolute right-8 bottom-1/4 flex flex-col items-center space-y-8">
+          <div className={`absolute right-8 bottom-1/4 flex flex-col items-center space-y-8 transition-all duration-300 ${
+            isTransitioning 
+              ? 'opacity-0 transform translate-x-8' 
+              : 'opacity-100 transform translate-x-0'
+          }`}>
             <Button variant="ghost" size="icon" className="h-14 w-14 rounded-full bg-gray-800/50 text-white">
               <Heart className="h-8 w-8" />
             </Button>
@@ -327,6 +403,27 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
             {sourceType === "recommend" && "为您推荐"}
             {sourceType === "following" && "关注更新"}
             {sourceType === "friends" && "好友动态"}
+          </div>
+          
+          {/* 添加操作提示 */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800/50 px-6 py-2 rounded-full text-white text-sm flex items-center space-x-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+              <span>滑动鼠标</span>
+            </div>
+            <div className="w-px h-4 bg-gray-400"></div>
+            <div className="flex items-center">
+              <span className="inline-block border border-white px-2 py-0.5 text-xs rounded mr-2">↓</span>
+              <span>下个视频</span>
+            </div>
+            <div className="w-px h-4 bg-gray-400"></div>
+            <div className="flex items-center">
+              <span className="inline-block border border-white px-2 py-0.5 text-xs rounded mr-2">空格</span>
+              <span>播放/暂停</span>
+            </div>
           </div>
         </div>
       </div>
