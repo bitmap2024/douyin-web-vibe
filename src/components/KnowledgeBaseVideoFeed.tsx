@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Share, Bookmark } from "lucide-react";
+import { Heart, MessageSquare, Share, Bookmark, Plus, Check, MessageCircle, MoreHorizontal, HeartOff, UserMinus, AlertTriangle, Keyboard } from "lucide-react";
 import { useAllKnowledgeBases, useCurrentUser, getUserByUsername } from "@/lib/api";
 import UserAvatar from "@/components/UserAvatar";
 
@@ -33,7 +33,13 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionDirection, setTransitionDirection] = useState<'up' | 'down'>('down');
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isFollowing, setIsFollowing] = useState<Record<number, boolean>>({});
+  const [likedItems, setLikedItems] = useState<Record<number, boolean>>({});
+  const [bookmarkedItems, setBookmarkedItems] = useState<Record<number, boolean>>({});
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
   const videoRef = useRef<HTMLDivElement>(null);
+  const moreOptionsRef = useRef<HTMLDivElement>(null);
   
   // 添加更多视频内容
   const videoContents = [
@@ -151,12 +157,15 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
     // 获取所有知识库创建者的信息
     const fetchOwners = async () => {
       const ownersMap: Record<number, any> = {};
+      const followingMap: Record<number, boolean> = {};
       // 只获取前20个知识库的创建者信息，避免过多API调用
       const kbsToFetch = generatedData.slice(0, 20);
       for (const kb of kbsToFetch) {
         try {
           const user = await getUserByUsername(`用户${kb.userId}`);
           ownersMap[kb.userId] = user;
+          // 随机设置是否关注 (模拟数据)
+          followingMap[kb.userId] = Math.random() > 0.5;
         } catch (error) {
           console.error(`获取用户信息失败: ${kb.userId}`, error);
           // 创建默认用户信息
@@ -164,9 +173,11 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
             username: `用户${kb.userId}`, 
             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${kb.userId}` 
           };
+          followingMap[kb.userId] = false;
         }
       }
       setOwners(ownersMap);
+      setIsFollowing(followingMap);
     };
     
     fetchOwners();
@@ -250,6 +261,65 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
       }
     };
   }, [currentIndex, filteredKnowledgeBases]); // eslint-disable-line react-hooks/exhaustive-deps
+  
+  const handleFollowClick = (userId: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setIsFollowing(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }));
+  };
+
+  const handleLikeClick = (kbId: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setLikedItems(prev => ({
+      ...prev,
+      [kbId]: !prev[kbId]
+    }));
+  };
+
+  const handleBookmarkClick = (kbId: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setBookmarkedItems(prev => ({
+      ...prev,
+      [kbId]: !prev[kbId]
+    }));
+  };
+
+  const handleShareClick = (kbId: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    // 分享逻辑，这里简单提示一下
+    alert(`已复制分享链接: /knowledge-base/${kbId}`);
+  };
+  
+  // 格式化数字函数
+  const formatNumber = (num: number): string => {
+    if (num >= 10000) {
+      return (num / 10000).toFixed(1) + '万';
+    }
+    return num.toString();
+  };
+  
+  // 添加关闭菜单的事件监听
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreOptionsRef.current && !moreOptionsRef.current.contains(event.target as Node)) {
+        setShowMoreOptions(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  // 模拟评论数据
+  const mockComments = [
+    { id: 1, user: { name: "青秀卖土豆的", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=123" }, content: "一想到你拉的尿冲进下水道和别人的粪在一起就吃醋 😭 😭", time: "11小时前", location: "广西", likes: 299 },
+    { id: 2, user: { name: "乐乐乐", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=456" }, content: "dy最完美这一块 /", time: "16小时前", location: "英国", likes: 155, hasAuthorReply: true },
+    { id: 3, user: { name: "啊哈", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=789" }, content: "太棒了！", time: "14小时前", location: "广东", likes: 7, hasImage: true }
+  ];
   
   if (isLoading || !knowledgeBases || filteredKnowledgeBases.length === 0) {
     return (
@@ -349,48 +419,155 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
               </div>
             </div>
             
-            {/* 用户信息区域 */}
+            {/* 用户信息区域 - 只显示@用户名 */}
             <div className="flex items-center mb-8">
-              <UserAvatar 
-                username={owner.username}
-                avatarSrc={owner.avatar}
-                size="lg"
-                className="w-12 h-12 mr-3" 
-              />
-              <div>
-                <div className="text-white font-medium text-lg">{owner.username}</div>
-                <div className="text-gray-400">
-                  {currentKB.papers.length} 篇论文 • {currentKB.stars} 收藏
-                </div>
-              </div>
+              <div className="text-white font-medium text-lg">@{owner.username}</div>
             </div>
           </div>
           
-          {/* 右侧操作按钮 */}
-          <div className={`absolute right-8 bottom-1/4 flex flex-col items-center space-y-8 transition-all duration-300 ${
+          {/* 右侧操作按钮 - 抖音风格 */}
+          <div className={`absolute right-3 bottom-40 flex flex-col items-center space-y-5 transition-all duration-300 ${
             isTransitioning 
               ? 'opacity-0 transform translate-x-8' 
               : 'opacity-100 transform translate-x-0'
           }`}>
-            <Button variant="ghost" size="icon" className="h-14 w-14 rounded-full bg-gray-800/50 text-white">
-              <Heart className="h-8 w-8" />
-            </Button>
-            <div className="text-white">128</div>
+            {/* 用户头像及关注按钮 */}
+            <div className="flex flex-col items-center">
+              <div className="relative">
+                <UserAvatar 
+                  username={owner.username}
+                  avatarSrc={owner.avatar}
+                  size="lg"
+                  className="w-12 h-12 border-2 border-white" 
+                />
+                {!isFollowing[currentKB.userId] && (
+                  <div 
+                    className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 h-5 w-5 rounded-full bg-pink-500 text-white flex items-center justify-center cursor-pointer"
+                    onClick={(e) => handleFollowClick(currentKB.userId, e)}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </div>
+                )}
+              </div>
+            </div>
             
-            <Button variant="ghost" size="icon" className="h-14 w-14 rounded-full bg-gray-800/50 text-white">
-              <MessageSquare className="h-8 w-8" />
-            </Button>
-            <div className="text-white">24</div>
+            {/* 喜欢按钮 */}
+            <div className="flex flex-col items-center">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className={`h-10 w-10 rounded-full bg-white text-black hover:bg-white ${likedItems[currentKB.id] ? 'bg-pink-500 text-white' : ''}`}
+                onClick={(e) => handleLikeClick(currentKB.id, e)}
+              >
+                <Heart className={`h-7 w-7 ${likedItems[currentKB.id] ? 'fill-current' : ''}`} />
+              </Button>
+              <span className="text-white text-xs mt-1">{formatNumber(likedItems[currentKB.id] ? 144001 : 144000)}</span>
+            </div>
             
-            <Button variant="ghost" size="icon" className="h-14 w-14 rounded-full bg-gray-800/50 text-white">
-              <Share className="h-8 w-8" />
-            </Button>
-            <div className="text-white">56</div>
+            {/* 评论按钮 */}
+            <div className="flex flex-col items-center">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-white text-black hover:bg-white"
+                onClick={() => setShowMessages(!showMessages)}
+              >
+                <MessageCircle className="h-7 w-7" />
+              </Button>
+              <span className="text-white text-xs mt-1">1205</span>
+            </div>
             
-            <Button variant="ghost" size="icon" className="h-14 w-14 rounded-full bg-gray-800/50 text-white">
-              <Bookmark className="h-8 w-8" />
-            </Button>
-            <div className="text-white">收藏</div>
+            {/* 收藏按钮 */}
+            <div className="flex flex-col items-center">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className={`h-10 w-10 rounded-full bg-white text-black hover:bg-white ${bookmarkedItems[currentKB.id] ? 'bg-yellow-400 text-black' : ''}`}
+                onClick={(e) => handleBookmarkClick(currentKB.id, e)}
+              >
+                <Bookmark className={`h-7 w-7 ${bookmarkedItems[currentKB.id] ? 'fill-current' : ''}`} />
+              </Button>
+              <span className="text-white text-xs mt-1">{formatNumber(bookmarkedItems[currentKB.id] ? 21001 : 21000)}</span>
+            </div>
+            
+            {/* 分享按钮 */}
+            <div className="flex flex-col items-center">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 rounded-full bg-white text-black hover:bg-white"
+                onClick={(e) => handleShareClick(currentKB.id, e)}
+              >
+                <Share className="h-7 w-7" />
+              </Button>
+              <span className="text-white text-xs mt-1">7976</span>
+            </div>
+
+            {/* 看相关 */}
+            {/* <div className="flex flex-col items-center">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-14 rounded-full text-white text-xs hover:bg-white/10 font-medium"
+              >
+                看相关
+              </Button>
+            </div> */}
+
+            {/* 更多按钮 - 横向三点 */}
+            <div className="flex flex-col items-center relative" ref={moreOptionsRef}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-full text-white hover:bg-white/10"
+                onClick={() => setShowMoreOptions(!showMoreOptions)}
+              >
+                <MoreHorizontal className="h-5 w-5" />
+              </Button>
+              
+              {/* 更多选项菜单 */}
+              {showMoreOptions && (
+                <div className="absolute right-0 bottom-10 bg-[#2A2B31] w-64 rounded-xl overflow-hidden shadow-xl z-50">
+                  <div className="p-3 grid grid-cols-4 gap-2">
+                    <div className="flex flex-col items-center">
+                      <div className="bg-[#434449] rounded-full w-14 h-14 flex items-center justify-center mb-1">
+                        <HeartOff className="w-7 h-7 text-white" />
+                      </div>
+                      <span className="text-white text-xs">不感兴趣</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="bg-[#434449] rounded-full w-14 h-14 flex items-center justify-center mb-1">
+                        <UserMinus className="w-7 h-7 text-white" />
+                      </div>
+                      <span className="text-white text-xs">取消关注</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="bg-[#434449] rounded-full w-14 h-14 flex items-center justify-center mb-1">
+                        <AlertTriangle className="w-7 h-7 text-white" />
+                      </div>
+                      <span className="text-white text-xs">举报</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="bg-[#434449] rounded-full w-14 h-14 flex items-center justify-center mb-1">
+                        <Keyboard className="w-7 h-7 text-white" />
+                      </div>
+                      <span className="text-white text-xs">快捷键列表</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 border-t border-gray-700 py-3 px-4">
+                    <div className="flex items-center">
+                      <span className="text-white text-xs">Shake9.创作的原声</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-gray-400 text-xs">2389人使用</span>
+                      <Button className="bg-[#FF4D4F] text-white hover:bg-[#FF4D4F]/90 text-xs rounded-full px-4 h-8">
+                        收藏
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
           {/* 当前索引/总数指示器 */}
@@ -425,6 +602,115 @@ const KnowledgeBaseVideoFeed: React.FC<KnowledgeBaseVideoFeedProps> = ({ sourceT
               <span>播放/暂停</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 从右侧滑出的评论面板 */}
+      <div 
+        className={`fixed top-16 right-0 h-[calc(100vh-4rem)] w-[450px] bg-[#2A2B31] shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+          showMessages ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* 顶部标签栏 */}
+        <div className="flex border-b border-gray-700">
+          <div className="px-6 py-2.5 text-gray-400 hover:text-white cursor-pointer text-sm">TA的作品</div>
+          <div className="px-6 py-2.5 text-white cursor-pointer border-b-2 border-pink-500 text-sm">评论</div>
+          <div className="px-6 py-2.5 text-gray-400 hover:text-white cursor-pointer text-sm">相关推荐</div>
+          <button 
+            className="ml-auto pr-4 text-gray-400 hover:text-white"
+            onClick={() => setShowMessages(false)}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        {/* 评论计数 */}
+        <div className="px-4 py-2 text-white text-sm">全部评论(293)</div>
+        
+        {/* 评论列表 */}
+        <div className="overflow-y-auto h-[calc(100%-110px)] px-4">
+          {mockComments.map((comment) => (
+            <div key={comment.id} className="py-3 border-b border-gray-700">
+              <div className="flex">
+                <img 
+                  src={comment.user.avatar} 
+                  alt={comment.user.name} 
+                  className="w-9 h-9 rounded-full mr-3" 
+                />
+                <div className="flex-1">
+                  <div className="text-white text-sm mb-1">{comment.user.name}</div>
+                  <div className="text-white text-sm mb-2">{comment.content}</div>
+                  
+                  {comment.hasImage && (
+                    <div className="mb-2">
+                      <img 
+                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=girl1" 
+                        alt="评论图片" 
+                        className="w-32 h-32 rounded-lg object-cover" 
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="text-gray-500 text-xs flex items-center">
+                    <span>{comment.time} · {comment.location}</span>
+                  </div>
+                  
+                  {comment.hasAuthorReply && (
+                    <div className="mt-1 px-2 py-0.5 bg-gray-700 text-gray-400 text-xs inline-block rounded">
+                      作者回复过
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* 评论操作 */}
+              <div className="mt-2 flex items-center pl-12 text-gray-500 text-xs">
+                <button className="flex items-center mr-6">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                  </svg>
+                  回复
+                </button>
+                <button className="flex items-center mr-6">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                  </svg>
+                  分享
+                </button>
+                <button className="flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                  </svg>
+                  {comment.likes}
+                </button>
+              </div>
+              
+              {/* 展开回复 */}
+              {comment.id !== 3 && (
+                <div className="mt-2 pl-12 text-gray-500 flex items-center cursor-pointer">
+                  <div className="h-px bg-gray-700 flex-grow mr-2"></div>
+                  <span className="text-xs">展开{comment.id === 1 ? '27' : '1'}条回复</span>
+                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        
+        {/* 底部评论框 */}
+        <div className="absolute bottom-0 left-0 right-0 bg-[#1F2026] p-2.5 flex items-center">
+          <input 
+            type="text" 
+            placeholder="说点什么..." 
+            className="flex-1 bg-[#434449] border-none rounded-full px-3.5 py-1.5 text-white text-xs focus:outline-none" 
+          />
+          <Button className="ml-2 rounded-full h-7 px-3.5 bg-[#FF4D4F] hover:bg-[#FF4D4F]/90 text-xs">
+            发送
+          </Button>
         </div>
       </div>
     </div>
