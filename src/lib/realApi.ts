@@ -43,6 +43,12 @@ export const realUserApi = {
   getUserByUsername: async (username: string) => {
     const response = await apiClient.get<User>(`/users/username/${username}`);
     return response.data;
+  },
+  
+  // 更新当前用户信息
+  updateCurrentUser: async (userData: Partial<User>) => {
+    const response = await apiClient.put<User>('/users/me', userData);
+    return response.data;
   }
 };
 

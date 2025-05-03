@@ -946,3 +946,28 @@ export const useCreateKnowledgeBase = () => {
     }
   });
 };
+
+// 更新当前用户信息
+export const updateCurrentUser = async (userData: Partial<User>) => {
+  if (config.useMockData) {
+    // 模拟更新操作
+    currentUser = {
+      ...currentUser,
+      ...userData
+    };
+    return currentUser;
+  } else {
+    return realUserApi.updateCurrentUser(userData);
+  }
+};
+
+export const useUpdateCurrentUser = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: updateCurrentUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    }
+  });
+};

@@ -9,6 +9,9 @@ export interface User {
   likedKnowledgeBases?: number[]; // 用户喜欢的知识库ID
   location?: string;
   experience?: string;
+  gender?: string;
+  age?: number;
+  school?: string;
 }
 
 // 消息类型
