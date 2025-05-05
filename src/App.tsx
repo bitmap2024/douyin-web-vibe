@@ -10,6 +10,8 @@ import Following from "./pages/Following";
 import Trending from "./pages/Trending";
 import LikedVideos from "./pages/LikedVideos";
 import KnowledgeBaseDetail from "./pages/KnowledgeBaseDetail";
+import KnowledgeBaseManage from "./pages/KnowledgeBaseManage";
+import KnowledgeBaseSettings from "./pages/KnowledgeBaseSettings";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EmailLoginForm from "./components/EmailLoginForm";
@@ -65,6 +67,8 @@ const App = () => {
             <Route path="/liked-videos" element={<LikedVideos />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/knowledge-base/:kbId" element={<KnowledgeBaseDetail />} />
+            <Route path="/knowledge-base/:kbId/manage" element={<KnowledgeBaseManage />} />
+            <Route path="/knowledge-base/:kbId/settings" element={<KnowledgeBaseSettings />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:userId" element={<MessageDetail />} />
             <Route path="/community" element={<Community />} />

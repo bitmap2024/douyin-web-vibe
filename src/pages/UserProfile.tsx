@@ -21,7 +21,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Bookmark } from "lucide-react";
 import { 
   useCurrentUser, 
   useUserByUsername, 
@@ -43,6 +43,26 @@ interface BrowsingHistoryItem {
   type: string;
   timestamp: Date;
   imageUrl?: string;
+  knowledgeBaseId?: number;
+}
+
+// 收藏项目类型
+interface FavoriteItem {
+  id: number;
+  title: string;
+  type: string;
+  addedAt: Date;
+  description?: string;
+  knowledgeBaseId?: number;
+}
+
+// 喜欢项目类型
+interface LikedItem {
+  id: number;
+  title: string;
+  type: string;
+  likedAt: Date;
+  creator: string;
   knowledgeBaseId?: number;
 }
 
@@ -71,6 +91,62 @@ const mockBrowsingHistory: BrowsingHistoryItem[] = [
   }
 ];
 
+// 模拟收藏数据
+const mockFavorites: FavoriteItem[] = [
+  {
+    id: 1,
+    title: "强化学习综述",
+    type: "知识库",
+    addedAt: new Date(2023, 11, 25, 9, 10),
+    description: "强化学习算法的全面概述与应用案例",
+    knowledgeBaseId: 7
+  },
+  {
+    id: 2,
+    title: "图神经网络入门",
+    type: "知识库",
+    addedAt: new Date(2023, 11, 22, 15, 30),
+    description: "图神经网络基础理论与实现",
+    knowledgeBaseId: 8
+  },
+  {
+    id: 3,
+    title: "计算机视觉技术",
+    type: "知识库",
+    addedAt: new Date(2023, 11, 19, 11, 45),
+    description: "从传统CV到深度学习的发展与应用",
+    knowledgeBaseId: 9
+  }
+];
+
+// 模拟喜欢数据
+const mockLikes: LikedItem[] = [
+  {
+    id: 1,
+    title: "生成式人工智能最新进展",
+    type: "知识库",
+    likedAt: new Date(2023, 11, 28, 13, 20),
+    creator: "AI研究员",
+    knowledgeBaseId: 10
+  },
+  {
+    id: 2,
+    title: "多模态学习方法",
+    type: "知识库",
+    likedAt: new Date(2023, 11, 26, 10, 15),
+    creator: "数据科学家",
+    knowledgeBaseId: 11
+  },
+  {
+    id: 3,
+    title: "转换器架构详解",
+    type: "知识库",
+    likedAt: new Date(2023, 11, 23, 16, 45),
+    creator: "NLP专家",
+    knowledgeBaseId: 12
+  }
+];
+
 interface UserProfileProps {
   isCurrentUser?: boolean;
 }
@@ -83,9 +159,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
   // State management - place all useState hooks at the top to maintain consistent order
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"knowledgeBases" | "likes" | "history">("knowledgeBases");
+  const [activeTab, setActiveTab] = useState<"knowledgeBases" | "likes" | "history" | "favorites">("knowledgeBases");
   const [isUserFollowing, setIsUserFollowing] = useState(false);
   const [browsingHistory, setBrowsingHistory] = useState<BrowsingHistoryItem[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  const [likes, setLikes] = useState<LikedItem[]>([]);
   const [editForm, setEditForm] = useState({
     gender: "男",
     age: "25",
@@ -157,6 +235,20 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
     // 这里应该调用API获取浏览历史数据
     // 目前使用模拟数据
     setBrowsingHistory(mockBrowsingHistory);
+  }, []);
+
+  // 加载收藏数据
+  useEffect(() => {
+    // 这里应该调用API获取收藏数据
+    // 目前使用模拟数据
+    setFavorites(mockFavorites);
+  }, []);
+
+  // 加载喜欢数据
+  useEffect(() => {
+    // 这里应该调用API获取喜欢数据
+    // 目前使用模拟数据
+    setLikes(mockLikes);
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -313,7 +405,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
               }`}
               onClick={() => setActiveTab("likes")}
             >
-              喜欢 0
+              喜欢 {likes.length}
+            </button>
+            <button 
+              className={`py-3 px-6 font-medium border-b-2 ${
+                activeTab === "favorites" 
+                  ? "text-white border-primary" 
+                  : "text-gray-400 border-transparent"
+              }`}
+              onClick={() => setActiveTab("favorites")}
+            >
+              收藏 {favorites.length}
             </button>
             <button 
               className={`py-3 px-6 font-medium border-b-2 ${
@@ -417,10 +519,92 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
                 </div>
               )
             ) : activeTab === "likes" ? (
-              <div className="flex flex-col justify-center items-center h-64 text-gray-400">
-                <svg width="64" height="64" fill="none" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#232526"/><path d="M24 16v8m0 0v4m0-4h4m-4 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/></svg>
-                <p className="mt-4">暂无喜欢的内容</p>
-              </div>
+              likes.length > 0 ? (
+                <div className="space-y-4">
+                  {likes.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="bg-[#1E1E1E] p-4 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors cursor-pointer"
+                      onClick={() => item.knowledgeBaseId && navigate(`/knowledge-base/${item.knowledgeBaseId}`)}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-grow">
+                          <h3 className="text-lg font-medium text-blue-400">{item.title}</h3>
+                          <div className="flex items-center mt-1">
+                            <span className="text-sm text-gray-400 mr-4">{item.type}</span>
+                            <span className="text-sm text-gray-400 mr-4">创建者: {item.creator}</span>
+                            <span className="text-sm text-gray-400">
+                              喜欢于: {format(item.likedAt, "yyyy-MM-dd HH:mm")}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            className="h-5 w-5 text-red-500 mr-3" 
+                            viewBox="0 0 20 20" 
+                            fill="currentColor"
+                          >
+                            <path 
+                              fillRule="evenodd" 
+                              d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" 
+                              clipRule="evenodd" 
+                            />
+                          </svg>
+                          <div className="text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col justify-center items-center h-64 text-gray-400">
+                  <svg width="64" height="64" fill="none" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#232526"/><path d="M24 16v8m0 0v4m0-4h4m-4 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/></svg>
+                  <p className="mt-4">暂无喜欢的内容</p>
+                </div>
+              )
+            ) : activeTab === "favorites" ? (
+              favorites.length > 0 ? (
+                <div className="space-y-4">
+                  {favorites.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="bg-[#1E1E1E] p-4 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors cursor-pointer"
+                      onClick={() => item.knowledgeBaseId && navigate(`/knowledge-base/${item.knowledgeBaseId}`)}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-grow">
+                          <h3 className="text-lg font-medium text-blue-400">{item.title}</h3>
+                          <p className="text-sm text-gray-300 mt-1 mb-2">{item.description}</p>
+                          <div className="flex items-center mt-1">
+                            <span className="text-sm text-gray-400 mr-4">{item.type}</span>
+                            <span className="text-sm text-gray-400">
+                              收藏于: {format(item.addedAt, "yyyy-MM-dd HH:mm")}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <Bookmark className="h-5 w-5 text-blue-400 mr-3" />
+                          <div className="text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col justify-center items-center h-64 text-gray-400">
+                  <svg width="64" height="64" fill="none" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#232526"/><path d="M24 16v8m0 0v4m0-4h4m-4 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/></svg>
+                  <p className="mt-4">暂无收藏内容</p>
+                </div>
+              )
             ) : (
               // 浏览历史内容
               browsingHistory.length > 0 ? (

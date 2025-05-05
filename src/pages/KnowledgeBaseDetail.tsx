@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
-import { useKnowledgeBase, useUser } from "@/lib/api";
+import { useKnowledgeBase, useUser, useCurrentUser } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,9 @@ import {
   Plus,
   MessageCircle,
   Send,
-  ArrowLeft
+  ArrowLeft,
+  Settings,
+  Database
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
@@ -81,6 +83,12 @@ const KnowledgeBaseDetail: React.FC = () => {
   
   // 获取知识库所有者数据
   const { data: ownerData } = useUser(kbData?.userId || 0);
+  
+  // 获取当前用户数据
+  const { data: currentUser } = useCurrentUser();
+  
+  // 判断当前用户是否是知识库所有者
+  const isCurrentUserOwner = currentUser?.id === kbData?.userId;
   
   // 示例议题数据
   const sampleIssues = [
@@ -282,6 +290,34 @@ const KnowledgeBaseDetail: React.FC = () => {
     }
   };
   
+  // 处理管理按钮点击
+  const handleManageClick = () => {
+    try {
+      navigate(`/knowledge-base/${kbId}/manage`);
+    } catch (error) {
+      console.error("导航到管理页面失败", error);
+      toast({
+        title: "导航失败",
+        description: "无法打开管理页面",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // 处理设置按钮点击
+  const handleSettingsClick = () => {
+    try {
+      navigate(`/knowledge-base/${kbId}/settings`);
+    } catch (error) {
+      console.error("导航到设置页面失败", error);
+      toast({
+        title: "导航失败",
+        description: "无法打开设置页面",
+        variant: "destructive"
+      });
+    }
+  };
+  
   if (isKbLoading || !kbData) {
     return (
       <div className="min-h-screen bg-[#121212] flex items-center justify-center">
@@ -310,6 +346,26 @@ const KnowledgeBaseDetail: React.FC = () => {
             <p className="text-gray-400 mt-1">{kbData.description}</p>
           </div>
           <div className="flex mt-4 md:mt-0">
+            {isCurrentUserOwner && (
+              <>
+                <Button 
+                  variant="outline" 
+                  className="mr-2 text-white border-gray-700 hover:bg-gray-800"
+                  onClick={handleManageClick}
+                >
+                  <Database className="h-4 w-4 mr-1" />
+                  管理
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="mr-2 text-white border-gray-700 hover:bg-gray-800"
+                  onClick={handleSettingsClick}
+                >
+                  <Settings className="h-4 w-4 mr-1" />
+                  设置
+                </Button>
+              </>
+            )}
             <Button variant="outline" className="mr-2 text-white border-gray-700 hover:bg-gray-800">
               <Star className="h-4 w-4 mr-1" />
               收藏 ({kbData.stars})
@@ -572,6 +628,7 @@ const KnowledgeBaseDetail: React.FC = () => {
               </div>
             </div>
           </TabsContent>
+          
         </Tabs>
       </div>
       

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Search, MessageSquare } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Search, MessageSquare, Bell, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -13,6 +13,99 @@ const Header: React.FC<HeaderProps> = ({
   onSearch 
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [notificationCount, setNotificationCount] = useState(3);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showAllMessages, setShowAllMessages] = useState(false);
+  const notificationContainerRef = useRef<HTMLDivElement>(null);
+  const notificationContentRef = useRef<HTMLDivElement>(null);
+  const allMessagesRef = useRef<HTMLDivElement>(null);
+
+  // 示例通知数据
+  const notifications = [
+    {
+      id: 1,
+      avatar: "https://via.placeholder.com/40",
+      username: "笨笨",
+      type: "赞了你的评论",
+      date: "04-06",
+      isLike: true
+    },
+    {
+      id: 2,
+      avatar: "https://via.placeholder.com/40",
+      username: "丁",
+      type: "赞了你的评论",
+      date: "04-04",
+      isLike: true
+    },
+    {
+      id: 3,
+      avatar: "https://via.placeholder.com/40",
+      username: "Z",
+      type: "等2人赞了你的评论",
+      date: "04-03",
+      isLike: true,
+      supporters: ["https://via.placeholder.com/30"]
+    },
+    {
+      id: 4,
+      avatar: "https://via.placeholder.com/40",
+      username: "松果体",
+      type: "赞了你的评论",
+      date: "04-01",
+      isLike: true
+    },
+    {
+      id: 5, 
+      avatar: "https://via.placeholder.com/40",
+      username: "开心的小红牛",
+      type: "等3人赞了你的评论",
+      date: "03-30",
+      isLike: true,
+      supporters: ["https://via.placeholder.com/30", "https://via.placeholder.com/30"]
+    }
+  ];
+
+  // 处理鼠标悬停显示通知
+  const handleNotificationMouseEnter = () => {
+    setShowNotifications(true);
+  };
+
+  // 处理鼠标移出隐藏通知
+  const handleNotificationMouseLeave = (e: React.MouseEvent) => {
+    // 检查鼠标是否真的离开了整个通知容器
+    // 这里需要使用原生事件的relatedTarget来检查鼠标去向
+    const relatedTarget = e.relatedTarget as Node;
+    const container = notificationContainerRef.current;
+    
+    // 如果鼠标移动到的元素是容器内部的元素，不隐藏下拉框
+    if (container && container.contains(relatedTarget)) {
+      return;
+    }
+    
+    setShowNotifications(false);
+  };
+
+  // 处理点击全部消息
+  const toggleAllMessages = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowAllMessages(!showAllMessages);
+  };
+
+  // 点击外部关闭全部消息下拉栏
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (allMessagesRef.current && !allMessagesRef.current.contains(event.target as Node)) {
+        setShowAllMessages(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +143,102 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-5">
           {/* <Link to="/pricing" className="text-gray-300 text-sm hover:text-white cursor-pointer">定价</Link> */}
+          <div 
+            className="relative"
+            ref={notificationContainerRef}
+          >
+            <a 
+              href="#" 
+              className="text-gray-300 hover:text-white flex items-center space-x-1 cursor-pointer relative"
+              onMouseEnter={handleNotificationMouseEnter}
+            >
+              <Bell className="h-5 w-5" />
+              {notificationCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-[#fe2c55] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {notificationCount}
+                </span>
+              )}
+              <span className="text-sm">通知</span>
+            </a>
+            
+            {showNotifications && (
+              <div 
+                className="absolute right-0 mt-2 w-80 bg-[#1a1a1a] rounded-lg shadow-xl overflow-hidden z-50"
+                ref={notificationContentRef}
+                onMouseLeave={handleNotificationMouseLeave}
+              >
+                <div className="flex justify-between items-center px-4 py-3 border-b border-gray-800">
+                  <h3 className="text-white font-medium">互动消息</h3>
+                  <div className="relative" ref={allMessagesRef}>
+                    <a 
+                      href="#" 
+                      className="text-white text-sm flex items-center space-x-1"
+                      onClick={toggleAllMessages}
+                    >
+                      <span>全部消息</span>
+                      {showAllMessages ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    </a>
+                    
+                    {showAllMessages && (
+                      <div className="absolute right-0 top-full mt-1 w-32 bg-[#252525] rounded shadow-lg overflow-hidden z-50">
+                        <div className="py-2 flex flex-col text-sm">
+                          <a href="#" className="text-white px-4 py-2 hover:bg-[#333333] flex items-center">
+                            全部消息
+                          </a>
+                          <a href="#" className="text-white px-4 py-2 hover:bg-[#333333] flex items-center">
+                            粉丝
+                          </a>
+                          <a href="#" className="text-white px-4 py-2 hover:bg-[#333333] flex items-center">
+                            @我的
+                          </a>
+                          <a href="#" className="text-white px-4 py-2 hover:bg-[#333333] flex items-center">
+                            评论
+                          </a>
+                          <a href="#" className="text-white px-4 py-2 hover:bg-[#333333] flex items-center">
+                            赞
+                          </a>
+                          <a href="#" className="text-white px-4 py-2 hover:bg-[#333333] flex items-center">
+                            弹幕
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map(notification => (
+                    <div key={notification.id} className="flex items-start p-4 hover:bg-[#252525] border-b border-gray-800">
+                      <div className="relative">
+                        <img src={notification.avatar} alt={notification.username} className="w-10 h-10 rounded-full object-cover" />
+                        {notification.isLike && (
+                          <div className="absolute -bottom-1 -right-1 bg-[#fe2c55] rounded-full p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-3 flex-1">
+                        <div className="flex justify-between">
+                          <p className="text-white font-medium">{notification.username}</p>
+                          <span className="text-gray-400 text-xs">{notification.date}</span>
+                        </div>
+                        <p className="text-gray-300 text-sm">{notification.type}</p>
+                        {notification.supporters && (
+                          <div className="mt-1 flex">
+                            {notification.supporters.map((supporter, index) => (
+                              <img key={index} src={supporter} alt="supporter" className="w-6 h-6 rounded-full -ml-1 first:ml-0 border border-[#1a1a1a]" />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <a href="https://discord.gg/sparkhub" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white flex items-center space-x-1 cursor-pointer">
             <MessageSquare className="h-5 w-5" />
             <span className="text-sm">Discord</span>

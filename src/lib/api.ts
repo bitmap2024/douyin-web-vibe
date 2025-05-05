@@ -791,8 +791,22 @@ export const useUserKnowledgeBasesByUsername = (username: string) => {
 export const useKnowledgeBase = (kbId: number) => {
   return useQuery({
     queryKey: ['knowledgeBase', kbId],
-    queryFn: () => getKnowledgeBase(kbId),
-    enabled: kbId > 0
+    queryFn: async () => {
+      try {
+        console.log(`[API] 获取知识库数据，ID: ${kbId}`);
+        const result = await getKnowledgeBase(kbId);
+        console.log(`[API] 知识库数据获取结果:`, result);
+        if (!result) {
+          throw new Error(`知识库不存在 (ID: ${kbId})`);
+        }
+        return result;
+      } catch (error) {
+        console.error(`[API] 获取知识库失败 (ID: ${kbId}):`, error);
+        throw error;
+      }
+    },
+    enabled: kbId > 0,
+    retry: 1
   });
 };
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useCurrentUser } from "@/lib/api";
 
 interface NavItemProps {
   icon: React.ReactNode;
@@ -30,9 +31,17 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isActive, onClick, count
   );
 };
 
+// 检查用户是否为管理员的函数
+const isUserAdmin = (user: any): boolean => {
+  // 检查user是否存在，并且is_superuser属性为true
+  return !!user && (user.is_superuser === true);
+};
+
 const LeftSidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { data: currentUser } = useCurrentUser();
+  const isAdmin = isUserAdmin(currentUser);
 
   // 获取当前路径并确定活动标签
   const getActiveTab = () => {
@@ -43,6 +52,7 @@ const LeftSidebar: React.FC = () => {
     if (path.includes("/trending")) return "trending";
     if (path.includes("/featured")) return "featured";
     if (path.includes("/spark")) return "spark";
+    if (path.includes("/community/manage")) return "community-manage";
     if (path.includes("/community")) return "community";
     // 默认为推荐
     return "recommend";
@@ -63,6 +73,7 @@ const LeftSidebar: React.FC = () => {
     { icon: "👥", label: "朋友", id: "friends" },
     { icon: "👤", label: "关注", id: "following" },
     { icon: "💬", label: "社区", id: "community" },
+    ...(isAdmin ? [{ icon: "🛠️", label: "社区管理", id: "community-manage" }] : []),
     { icon: "👤", label: "我的", id: "profile" },
   ];
 
@@ -94,6 +105,9 @@ const LeftSidebar: React.FC = () => {
         break;
       case "community":
         navigate("/community");
+        break;
+      case "community-manage":
+        navigate("/community/manage");
         break;
       // 其他导航项的处理可以在这里添加
       default:
