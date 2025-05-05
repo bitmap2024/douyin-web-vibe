@@ -1,13 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { Search, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 interface HeaderProps {
   onLoginClick?: () => void;
+  onSearch?: (query: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onLoginClick = () => {} }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  onLoginClick = () => {}, 
+  onSearch 
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSearch && searchQuery.trim()) {
+      onSearch(searchQuery);
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-[#121212] z-50 flex items-center justify-between px-4 border-b border-gray-800">
       <Link to="/" className="flex items-center space-x-2">
@@ -20,21 +33,23 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick = () => {} }) => {
       </Link>
       
       <div className="flex-1 max-w-md mx-auto">
-        <div className="relative">
+        <form onSubmit={handleSearchSubmit} className="relative">
           <input 
             type="text"
             placeholder="搜索..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-[#2a2a2a] rounded-full py-2 pl-4 pr-10 text-white focus:outline-none"
           />
-          <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white">
+          <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white">
             <Search className="h-5 w-5" />
           </button>
-        </div>
+        </form>
       </div>
       
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-5">
-          <Link to="/pricing" className="text-gray-300 text-sm hover:text-white cursor-pointer">定价</Link>
+          {/* <Link to="/pricing" className="text-gray-300 text-sm hover:text-white cursor-pointer">定价</Link> */}
           <a href="https://discord.gg/sparkhub" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white flex items-center space-x-1 cursor-pointer">
             <MessageSquare className="h-5 w-5" />
             <span className="text-sm">Discord</span>

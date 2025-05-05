@@ -24,6 +24,7 @@ import Spark from "./pages/Spark";
 import Friends from "./pages/Friends";
 import Community from "./pages/Community";
 import CreatePost from "./pages/CreatePost";
+import SearchResults from "./pages/SearchResults";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ const App = () => {
             <Route path="/community" element={<Community />} />
             <Route path="/community/create" element={<CreatePost />} />
             <Route path="/community/:postId" element={<Community />} />
+            <Route path="/search" element={<SearchResults />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -16,18 +16,24 @@ import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
+import { useSearchHandler } from "@/lib/navigation";
 
 const Community: React.FC = () => {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showNewPostForm, setShowNewPostForm] = useState(false);
+  const [viewType, setViewType] = useState<"all" | "following">("all");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"latest" | "popular">("latest");
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [newComment, setNewComment] = useState("");
-  const [newPostOpen, setNewPostOpen] = useState(false);
-  const [newPostTitle, setNewPostTitle] = useState("");
-  const [newPostContent, setNewPostContent] = useState("");
+  const [isViewing, setIsViewing] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const handleSearch = useSearchHandler();
 
   // 初始化加载帖子
   useEffect(() => {
@@ -61,11 +67,14 @@ const Community: React.FC = () => {
       const post = posts.find(p => p.id === postId);
       if (post) {
         setSelectedPost(post);
+      } else {
+        // 如果找不到对应的帖子，重定向到社区首页
+        navigate("/community");
       }
     } else {
       setSelectedPost(null);
     }
-  }, [postId, posts]);
+  }, [postId, posts, navigate]);
 
   // 处理点赞帖子
   const handleLikePost = (postId: string) => {
@@ -151,30 +160,6 @@ const Community: React.FC = () => {
     }
   };
 
-  // 创建新帖子
-  const handleCreatePost = () => {
-    if (newPostTitle.trim() && newPostContent.trim()) {
-      const newPost: Post = {
-        id: `p${Date.now()}`,
-        title: newPostTitle,
-        content: newPostContent,
-        author: {
-          id: "currentUser",
-          username: "我",
-          avatar: "",
-        },
-        createdAt: "刚刚",
-        likes: 0,
-        comments: [],
-      };
-
-      setPosts([newPost, ...posts]);
-      setNewPostTitle("");
-      setNewPostContent("");
-      setNewPostOpen(false);
-    }
-  };
-
   // 查看帖子详情
   const handleViewPost = (postId: string) => {
     navigate(`/community/${postId}`);
@@ -191,8 +176,11 @@ const Community: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
-      <Header />
+    <div className="min-h-screen bg-[#121212]">
+      <Header 
+        onLoginClick={() => setIsLoginOpen(true)} 
+        onSearch={handleSearch}
+      />
       <LeftSidebar />
       <div className="pt-16 pl-64">
         <div className="container mx-auto py-6 px-4">

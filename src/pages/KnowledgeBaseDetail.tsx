@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import EmailLoginForm from "@/components/EmailLoginForm";
 import UserAvatar from "@/components/UserAvatar";
+import { useSearchHandler } from "@/lib/navigation";
 
 const KnowledgeBaseDetail: React.FC = () => {
   const { kbId } = useParams<{ kbId: string }>();
@@ -201,6 +202,8 @@ const KnowledgeBaseDetail: React.FC = () => {
     }
   ];
   
+  const handleSearch = useSearchHandler();
+  
   // 处理登录点击
   const handleLoginClick = () => {
     setIsLoginOpen(true);
@@ -289,7 +292,10 @@ const KnowledgeBaseDetail: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-[#121212]">
-      <Header onLoginClick={handleLoginClick} />
+      <Header 
+        onLoginClick={handleLoginClick} 
+        onSearch={handleSearch}
+      />
       <div className="pt-16 px-4 max-w-6xl mx-auto">
         {/* 返回按钮 */}
         <Link to={`/user/${ownerData?.username || ""}`} className="inline-flex items-center text-gray-400 hover:text-white mt-4">

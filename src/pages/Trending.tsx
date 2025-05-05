@@ -4,7 +4,7 @@ import LeftSidebar from "@/components/LeftSidebar";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EmailLoginForm from "@/components/EmailLoginForm";
 import { useAllKnowledgeBases } from "@/lib/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import UserAvatar from "@/components/UserAvatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -14,9 +14,16 @@ const Trending: React.FC = () => {
   const [trendingItems, setTrendingItems] = useState<any[]>([]);
   const [trendingUsers, setTrendingUsers] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"content" | "users">("content");
+  const navigate = useNavigate();
   
   const handleLoginClick = () => {
     setIsLoginOpen(true);
+  };
+  
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
   };
   
   // 生成模拟的热门内容
@@ -141,7 +148,7 @@ const Trending: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-[#121212]">
-      <Header onLoginClick={handleLoginClick} />
+      <Header onLoginClick={handleLoginClick} onSearch={handleSearch} />
       <LeftSidebar />
       {/* 主体内容区域，右侧主区域布局 */}
       <div className="ml-64 mt-16 p-8">

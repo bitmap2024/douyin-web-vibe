@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAllKnowledgeBases } from "@/lib/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { useSearchHandler } from "@/lib/navigation";
 
 // 模拟精选知识库分类
 const categories = [
@@ -21,6 +22,7 @@ const Featured: React.FC = () => {
   const { data: knowledgeBases, isLoading } = useAllKnowledgeBases();
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("all");
+  const handleSearch = useSearchHandler();
   
   const handleLoginClick = () => {
     setIsLoginOpen(true);
@@ -82,7 +84,7 @@ const Featured: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-[#121212]">
-      <Header onLoginClick={handleLoginClick} />
+      <Header onLoginClick={handleLoginClick} onSearch={handleSearch} />
       <LeftSidebar />
       
       {/* 主体内容区域，右侧主区域布局 */}

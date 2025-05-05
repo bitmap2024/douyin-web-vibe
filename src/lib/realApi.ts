@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import { User, Message, Conversation } from './types';
+import { User, Message, Conversation, BrowsingHistoryItem } from './types';
 
 // 用户相关 API
 export const realUserApi = {
@@ -78,6 +78,33 @@ export const realMessageApi = {
   // 标记消息为已读
   markMessagesAsRead: async (userId: number) => {
     const response = await apiClient.post<boolean>(`/messages/${userId}/read`, {});
+    return response.data;
+  }
+};
+
+// 浏览历史相关 API
+export const realBrowsingHistoryApi = {
+  // 获取用户浏览历史
+  getUserBrowsingHistory: async (userId: number) => {
+    const response = await apiClient.get<BrowsingHistoryItem[]>(`/user/browsing-history/${userId}`);
+    return response.data;
+  },
+  
+  // 获取当前用户浏览历史
+  getCurrentUserBrowsingHistory: async () => {
+    const response = await apiClient.get<BrowsingHistoryItem[]>(`/user/browsing-history`);
+    return response.data;
+  },
+  
+  // 添加浏览历史记录
+  addBrowsingHistory: async (item: Omit<BrowsingHistoryItem, 'id' | 'userId' | 'timestamp'>) => {
+    const response = await apiClient.post<BrowsingHistoryItem>('/user/browsing-history', item);
+    return response.data;
+  },
+  
+  // 清除浏览历史记录
+  clearBrowsingHistory: async () => {
+    const response = await apiClient.delete<boolean>('/user/browsing-history');
     return response.data;
   }
 };

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { config } from './config';
-import { realUserApi, realMessageApi, realKnowledgeBaseApi, realPaperApi } from './realApi';
-import { User, Message, Conversation, Paper, KnowledgeBase } from './types';
+import { realUserApi, realMessageApi, realKnowledgeBaseApi, realPaperApi, realBrowsingHistoryApi } from './realApi';
+import { User, Message, Conversation, Paper, KnowledgeBase, BrowsingHistoryItem } from './types';
 
 // 模拟用户数据
 export const users = [
@@ -368,6 +368,55 @@ const messages: Message[] = [
     content: "我们可以交流一下关于人工智能的研究吗？",
     timestamp: "2023-04-27T09:20:00Z",
     isRead: false
+  }
+];
+
+// 模拟浏览历史记录数据
+const browsingHistory: BrowsingHistoryItem[] = [
+  {
+    id: 1,
+    userId: 0, // 当前用户
+    contentId: 1,
+    contentType: 'knowledge-base',
+    title: "人工智能伦理研究",
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2天前
+    imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=kb-1"
+  },
+  {
+    id: 2,
+    userId: 0,
+    contentId: 2,
+    contentType: 'knowledge-base',
+    title: "机器学习算法优化",
+    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5天前
+    imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=kb-2"
+  },
+  {
+    id: 3,
+    userId: 0,
+    contentId: 7,
+    contentType: 'knowledge-base',
+    title: "自然语言处理前沿研究",
+    timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7天前
+    imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=kb-7"
+  },
+  {
+    id: 4,
+    userId: 0,
+    contentId: 12,
+    contentType: 'knowledge-base',
+    title: "深度学习架构解析",
+    timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10天前
+    imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=kb-12"
+  },
+  {
+    id: 5,
+    userId: 0,
+    contentId: 18,
+    contentType: 'knowledge-base',
+    title: "数据分析实战案例",
+    timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 14天前
+    imageUrl: "https://api.dicebear.com/7.x/shapes/svg?seed=kb-18"
   }
 ];
 
@@ -968,6 +1017,117 @@ export const useUpdateCurrentUser = () => {
     mutationFn: updateCurrentUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    }
+  });
+};
+
+// 获取用户浏览历史
+export const getUserBrowsingHistory = async (userId: number): Promise<BrowsingHistoryItem[]> => {
+  if (config.useMockData) {
+    // 模拟API延迟
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // 如果是当前用户，返回预设的浏览历史
+    if (userId === 0) {
+      return browsingHistory;
+    }
+    
+    // 为其他用户生成随机浏览历史
+    return Array.from({ length: 3 }, (_, i) => ({
+      id: 1000 + i,
+      userId,
+      contentId: Math.floor(Math.random() * 20) + 1,
+      contentType: 'knowledge-base',
+      title: `用户${userId}的知识库浏览记录${i + 1}`,
+      timestamp: new Date(Date.now() - (i + 1) * 3 * 24 * 60 * 60 * 1000).toISOString(),
+      imageUrl: `https://api.dicebear.com/7.x/shapes/svg?seed=kb-user-${userId}-${i}`
+    }));
+  } else {
+    return realBrowsingHistoryApi.getUserBrowsingHistory(userId);
+  }
+};
+
+// 获取当前用户浏览历史
+export const getCurrentUserBrowsingHistory = async (): Promise<BrowsingHistoryItem[]> => {
+  if (config.useMockData) {
+    // 模拟API延迟
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return browsingHistory;
+  } else {
+    return realBrowsingHistoryApi.getCurrentUserBrowsingHistory();
+  }
+};
+
+// 添加浏览历史记录
+export const addBrowsingHistory = async (
+  item: Omit<BrowsingHistoryItem, 'id' | 'userId' | 'timestamp'>
+): Promise<BrowsingHistoryItem> => {
+  if (config.useMockData) {
+    // 模拟API延迟
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // 创建新的浏览记录条目
+    const newItem: BrowsingHistoryItem = {
+      id: Date.now(),
+      userId: 0, // 当前用户
+      timestamp: new Date().toISOString(),
+      ...item
+    };
+    
+    // 在实际应用中，这里会将新记录添加到存储中
+    // 在模拟环境下，我们只返回创建的对象
+    return newItem;
+  } else {
+    return realBrowsingHistoryApi.addBrowsingHistory(item);
+  }
+};
+
+// 清除浏览历史记录
+export const clearBrowsingHistory = async (): Promise<boolean> => {
+  if (config.useMockData) {
+    // 模拟API延迟
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // 在实际应用中，这里会清除存储中的记录
+    // 在模拟环境下，我们只返回成功状态
+    return true;
+  } else {
+    return realBrowsingHistoryApi.clearBrowsingHistory();
+  }
+};
+
+// React Query Hooks for browsing history
+export const useUserBrowsingHistory = (userId: number) => {
+  return useQuery(['browsingHistory', userId], () => getUserBrowsingHistory(userId), {
+    enabled: userId !== undefined
+  });
+};
+
+export const useCurrentUserBrowsingHistory = () => {
+  return useQuery(['currentUserBrowsingHistory'], getCurrentUserBrowsingHistory);
+};
+
+export const useAddBrowsingHistory = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation(
+    (item: Omit<BrowsingHistoryItem, 'id' | 'userId' | 'timestamp'>) => addBrowsingHistory(item),
+    {
+      onSuccess: () => {
+        // 添加成功后，刷新当前用户的浏览历史
+        queryClient.invalidateQueries(['currentUserBrowsingHistory']);
+      }
+    }
+  );
+};
+
+export const useClearBrowsingHistory = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation(clearBrowsingHistory, {
+    onSuccess: () => {
+      // 清除成功后，刷新当前用户的浏览历史
+      queryClient.invalidateQueries(['currentUserBrowsingHistory']);
     }
   });
 };

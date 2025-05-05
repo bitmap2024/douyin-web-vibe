@@ -14,6 +14,17 @@ export interface User {
   school?: string;
 }
 
+// 浏览历史记录类型
+export interface BrowsingHistoryItem {
+  id: number;
+  userId: number;
+  contentId: number;
+  contentType: string; // 'knowledge-base', 'paper', 'video' 等
+  title: string;
+  timestamp: string;
+  imageUrl?: string;
+}
+
 // 消息类型
 export interface Message {
   id: number;

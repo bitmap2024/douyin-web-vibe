@@ -15,6 +15,9 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import EmailLoginForm from "@/components/EmailLoginForm";
+import { useSearchHandler } from "@/lib/navigation";
 
 // 模拟项目类型
 interface ProjectType {
@@ -44,11 +47,10 @@ const Spark: React.FC = () => {
     isPending: isCreating 
   } = useCreateKnowledgeBase();
   
-  const handleLoginClick = () => {
-    setIsLoginOpen(true);
-  };
+  const handleGlobalSearch = useSearchHandler();
   
-  const handleSearch = useCallback(() => {
+  // 创建一个本地搜索函数
+  const handleLocalSearch = useCallback(() => {
     if (!searchInput.trim()) {
       toast({
         title: "请输入搜索内容",
@@ -60,6 +62,10 @@ const Spark: React.FC = () => {
     
     setSearchTrigger(searchInput);
   }, [searchInput, toast]);
+  
+  const handleLoginClick = () => {
+    setIsLoginOpen(true);
+  };
   
   const handleCreateKnowledgeBase = useCallback(() => {
     if (!currentUser) {
@@ -132,7 +138,10 @@ const Spark: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-[#121212]">
-      <Header onLoginClick={handleLoginClick} />
+      <Header 
+        onLoginClick={() => setIsLoginOpen(true)} 
+        onSearch={handleGlobalSearch}
+      />
       <LeftSidebar />
       
       {/* 主体内容区域 */}
@@ -175,7 +184,7 @@ const Spark: React.FC = () => {
                   <Button 
                     variant="default" 
                     className="bg-gradient-to-r from-blue-600 to-pink-600 text-white rounded-lg px-6"
-                    onClick={handleSearch}
+                    onClick={handleLocalSearch}
                     disabled={isSearching}
                   >
                     {isSearching ? (

@@ -34,6 +34,42 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import MessageButton from "@/components/MessageButton";
 import UserAvatar from "@/components/UserAvatar";
+import { format } from "date-fns";
+
+// 浏览历史记录类型
+interface BrowsingHistoryItem {
+  id: number;
+  title: string;
+  type: string;
+  timestamp: Date;
+  imageUrl?: string;
+  knowledgeBaseId?: number;
+}
+
+// 模拟浏览历史数据
+const mockBrowsingHistory: BrowsingHistoryItem[] = [
+  {
+    id: 1,
+    title: "深度学习基础",
+    type: "知识库",
+    timestamp: new Date(2023, 11, 20, 14, 30),
+    knowledgeBaseId: 3
+  },
+  {
+    id: 2,
+    title: "机器学习入门",
+    type: "知识库",
+    timestamp: new Date(2023, 11, 18, 10, 15),
+    knowledgeBaseId: 2
+  },
+  {
+    id: 3,
+    title: "自然语言处理",
+    type: "知识库",
+    timestamp: new Date(2023, 11, 15, 16, 45),
+    knowledgeBaseId: 5
+  }
+];
 
 interface UserProfileProps {
   isCurrentUser?: boolean;
@@ -47,8 +83,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
   // State management - place all useState hooks at the top to maintain consistent order
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"knowledgeBases" | "likes">("knowledgeBases");
+  const [activeTab, setActiveTab] = useState<"knowledgeBases" | "likes" | "history">("knowledgeBases");
   const [isUserFollowing, setIsUserFollowing] = useState(false);
+  const [browsingHistory, setBrowsingHistory] = useState<BrowsingHistoryItem[]>([]);
   const [editForm, setEditForm] = useState({
     gender: "男",
     age: "25",
@@ -114,6 +151,13 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
       });
     }
   }, [userData]);
+
+  // 加载浏览历史
+  useEffect(() => {
+    // 这里应该调用API获取浏览历史数据
+    // 目前使用模拟数据
+    setBrowsingHistory(mockBrowsingHistory);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -271,6 +315,16 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
             >
               喜欢 0
             </button>
+            <button 
+              className={`py-3 px-6 font-medium border-b-2 ${
+                activeTab === "history" 
+                  ? "text-white border-primary" 
+                  : "text-gray-400 border-transparent"
+              }`}
+              onClick={() => setActiveTab("history")}
+            >
+              浏览历史 {browsingHistory.length}
+            </button>
           </div>
           <div className="mt-6">
             {activeTab === "knowledgeBases" ? (
@@ -362,11 +416,46 @@ const UserProfile: React.FC<UserProfileProps> = ({ isCurrentUser = false }) => {
                   <p className="mt-4">暂无内容<br/>该账号还未发布过作品哦~</p>
                 </div>
               )
-            ) : (
+            ) : activeTab === "likes" ? (
               <div className="flex flex-col justify-center items-center h-64 text-gray-400">
                 <svg width="64" height="64" fill="none" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#232526"/><path d="M24 16v8m0 0v4m0-4h4m-4 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/></svg>
                 <p className="mt-4">暂无喜欢的内容</p>
               </div>
+            ) : (
+              // 浏览历史内容
+              browsingHistory.length > 0 ? (
+                <div className="space-y-4">
+                  {browsingHistory.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="bg-[#1E1E1E] p-4 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors cursor-pointer"
+                      onClick={() => item.knowledgeBaseId && navigate(`/knowledge-base/${item.knowledgeBaseId}`)}
+                    >
+                      <div className="flex items-center">
+                        <div className="flex-grow">
+                          <h3 className="text-lg font-medium text-blue-400">{item.title}</h3>
+                          <div className="flex items-center mt-1">
+                            <span className="text-sm text-gray-400 mr-4">{item.type}</span>
+                            <span className="text-sm text-gray-400">
+                              {format(item.timestamp, "yyyy-MM-dd HH:mm")}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col justify-center items-center h-64 text-gray-400">
+                  <svg width="64" height="64" fill="none" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#232526"/><path d="M24 16v8m0 0v4m0-4h4m0 0h-4" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><rect x="12" y="28" width="24" height="8" rx="2" fill="#232526" stroke="#666" strokeWidth="2"/></svg>
+                  <p className="mt-4">暂无浏览记录</p>
+                </div>
+              )
             )}
           </div>
         </div>
